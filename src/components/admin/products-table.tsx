@@ -24,70 +24,6 @@ export default function ProductsTable() {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([])
 
   const fetchProducts = useCallback(async () => {
-    // Sample products for demonstration
-    const sampleProducts: Product[] = [
-    {
-      id: '1',
-      name: 'Premium Salmon Treats',
-      description: 'Wild-caught salmon treats that dogs absolutely love.',
-      price: 24.99,
-      category: 'Treats & Snacks',
-      image_url: '/placeholder-product.jpg',
-      stock_quantity: 15,
-      is_active: true,
-      created_at: '2024-01-15T10:00:00Z',
-      updated_at: '2024-01-15T10:00:00Z'
-    },
-    {
-      id: '2',
-      name: 'Interactive Puzzle Toy',
-      description: 'Mental stimulation toy that challenges your dog.',
-      price: 32.99,
-      category: 'Toys & Enrichment',
-      image_url: '/placeholder-product.jpg',
-      stock_quantity: 3,
-      is_active: true,
-      created_at: '2024-01-14T10:00:00Z',
-      updated_at: '2024-01-14T10:00:00Z'
-    },
-    {
-      id: '3',
-      name: 'Organic Peanut Butter Biscuits',
-      description: 'Handmade organic biscuits with natural peanut butter.',
-      price: 18.99,
-      category: 'Treats & Snacks',
-      image_url: '/placeholder-product.jpg',
-      stock_quantity: 22,
-      is_active: true,
-      created_at: '2024-01-13T10:00:00Z',
-      updated_at: '2024-01-13T10:00:00Z'
-    },
-    {
-      id: '4',
-      name: 'Comfort Blanket',
-      description: 'Ultra-soft fleece blanket that provides comfort and warmth.',
-      price: 45.99,
-      category: 'Accessories',
-      image_url: '/placeholder-product.jpg',
-      stock_quantity: 0,
-      is_active: false,
-      created_at: '2024-01-12T10:00:00Z',
-      updated_at: '2024-01-12T10:00:00Z'
-    },
-    {
-      id: '5',
-      name: 'Natural Dental Chews',
-      description: 'Help maintain your dog\'s dental health with these natural chews.',
-      price: 29.99,
-      category: 'Treats & Snacks',
-      image_url: '/placeholder-product.jpg',
-      stock_quantity: 12,
-      is_active: true,
-      created_at: '2024-01-11T10:00:00Z',
-      updated_at: '2024-01-11T10:00:00Z'
-    }
-    ]
-
     try {
       const supabase = createClient()
       const { data, error } = await supabase
@@ -97,13 +33,13 @@ export default function ProductsTable() {
 
       if (error) {
         console.error('Error fetching products:', error)
-        setProducts(sampleProducts)
+        setProducts([])
       } else {
-        setProducts(data || sampleProducts)
+        setProducts(data || [])
       }
     } catch (err) {
       console.error('Error:', err)
-      setProducts(sampleProducts)
+      setProducts([])
     } finally {
       setLoading(false)
     }
@@ -114,18 +50,48 @@ export default function ProductsTable() {
   }, [fetchProducts])
 
   const toggleProductStatus = async (id: string, currentStatus: boolean) => {
-    // TODO: Implement status toggle with Supabase
-    setProducts(prev =>
-      prev.map(product =>
-        product.id === id ? { ...product, is_active: !currentStatus } : product
+    try {
+      const supabase = createClient()
+      const { error } = await supabase
+        .from('products')
+        .update({ is_active: !currentStatus })
+        .eq('id', id)
+
+      if (error) {
+        console.error('Error updating product status:', error)
+        return
+      }
+
+      // Update local state
+      setProducts(prev =>
+        prev.map(product =>
+          product.id === id ? { ...product, is_active: !currentStatus } : product
+        )
       )
-    )
+    } catch (err) {
+      console.error('Error:', err)
+    }
   }
 
   const deleteProduct = async (id: string) => {
     if (confirm('Are you sure you want to delete this product?')) {
-      // TODO: Implement delete with Supabase
-      setProducts(prev => prev.filter(product => product.id !== id))
+      try {
+        const supabase = createClient()
+        const { error } = await supabase
+          .from('products')
+          .delete()
+          .eq('id', id)
+
+        if (error) {
+          console.error('Error deleting product:', error)
+          return
+        }
+
+        // Update local state
+        setProducts(prev => prev.filter(product => product.id !== id))
+      } catch (err) {
+        console.error('Error:', err)
+      }
     }
   }
 
@@ -158,6 +124,23 @@ export default function ProductsTable() {
               <div key={i} className="h-16 bg-neutral-200 rounded"></div>
             ))}
           </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (products.length === 0) {
+    return (
+      <div className="bg-white rounded-xl shadow-sm border border-neutral-200">
+        <div className="p-12 text-center">
+          <h3 className="text-lg font-medium text-neutral-900 mb-2">No Products Found</h3>
+          <p className="text-neutral-600 mb-4">Get started by adding your first product to the catalog.</p>
+          <Link
+            href="/admin/products/new"
+            className="inline-flex items-center px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+          >
+            Add Product
+          </Link>
         </div>
       </div>
     )

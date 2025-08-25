@@ -1,62 +1,69 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react'
+import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 
 export default function AdminLoginForm() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-  const router = useRouter()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError('')
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
     try {
-      const supabase = createClient()
-      
+      const supabase = createClient();
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
-      })
+      });
 
       if (error) {
-        throw error
+        throw error;
       }
 
       if (data.user) {
         // Check if user has admin role
-        const userRole = data.user.user_metadata?.role || data.user.app_metadata?.role || 
-                        (data.user as any).raw_user_meta_data?.role
-        
-        if (userRole !== 'admin') {
-          await supabase.auth.signOut()
-          throw new Error('Access denied. Admin privileges required.')
+        const userRole =
+          data.user.user_metadata?.role ||
+          data.user.app_metadata?.role ||
+          (data.user as any).raw_user_meta_data?.role;
+
+        if (userRole !== "admin") {
+          await supabase.auth.signOut();
+          throw new Error("Access denied. Admin privileges required.");
         }
 
         // Redirect to admin dashboard
-        router.push('/admin')
-        router.refresh()
+        router.push("/admin");
+        router.refresh();
       }
     } catch (err) {
-      console.error('Login error:', err)
-      setError(err instanceof Error ? err.message : 'Login failed. Please try again.')
+      console.error("Login error:", err);
+      setError(
+        err instanceof Error ? err.message : "Login failed. Please try again."
+      );
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Email Field */}
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-2">
+        <label
+          htmlFor="email"
+          className="block text-sm font-medium text-neutral-700 mb-2"
+        >
           Email Address
         </label>
         <div className="relative">
@@ -76,13 +83,16 @@ export default function AdminLoginForm() {
 
       {/* Password Field */}
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-2">
+        <label
+          htmlFor="password"
+          className="block text-sm font-medium text-neutral-700 mb-2"
+        >
           Password
         </label>
         <div className="relative">
           <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-neutral-400" />
           <input
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -97,7 +107,11 @@ export default function AdminLoginForm() {
             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
             disabled={isLoading}
           >
-            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            {showPassword ? (
+              <EyeOff className="h-5 w-5" />
+            ) : (
+              <Eye className="h-5 w-5" />
+            )}
           </button>
         </div>
       </div>
@@ -115,7 +129,7 @@ export default function AdminLoginForm() {
         disabled={isLoading}
         className="w-full bg-amber-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors"
       >
-        {isLoading ? 'Signing in...' : 'Sign In'}
+        {isLoading ? "Signing in..." : "Sign In"}
       </button>
 
       {/* Help Text */}
@@ -125,5 +139,5 @@ export default function AdminLoginForm() {
         </p>
       </div>
     </form>
-  )
+  );
 }

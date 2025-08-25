@@ -21,69 +21,6 @@ export default function ProductGrid() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [sortBy, setSortBy] = useState('name')
 
-  // Sample products for demonstration
-  const sampleProducts: Product[] = [
-    {
-      id: '1',
-      name: 'Premium Salmon Treats',
-      description: 'Wild-caught salmon treats that dogs absolutely love. Made with natural ingredients and no artificial preservatives.',
-      price: 24.99,
-      category: 'Treats & Snacks',
-      image_url: '/placeholder-product.jpg',
-      stock_quantity: 15,
-      is_active: true
-    },
-    {
-      id: '2',
-      name: 'Interactive Puzzle Toy',
-      description: 'Mental stimulation toy that challenges your dog and helps reduce boredom. Perfect for intelligent breeds.',
-      price: 32.99,
-      category: 'Toys & Enrichment',
-      image_url: '/placeholder-product.jpg',
-      stock_quantity: 8,
-      is_active: true
-    },
-    {
-      id: '3',
-      name: 'Organic Peanut Butter Biscuits',
-      description: 'Handmade organic biscuits with natural peanut butter. No sugar, salt, or artificial additives.',
-      price: 18.99,
-      category: 'Treats & Snacks',
-      image_url: '/placeholder-product.jpg',
-      stock_quantity: 22,
-      is_active: true
-    },
-    {
-      id: '4',
-      name: 'Comfort Blanket',
-      description: 'Ultra-soft fleece blanket that provides comfort and warmth. Perfect for anxious dogs or cold nights.',
-      price: 45.99,
-      category: 'Accessories',
-      image_url: '/placeholder-product.jpg',
-      stock_quantity: 5,
-      is_active: true
-    },
-    {
-      id: '5',
-      name: 'Natural Dental Chews',
-      description: 'Help maintain your dog\'s dental health with these natural chews. Reduces tartar and freshens breath.',
-      price: 29.99,
-      category: 'Treats & Snacks',
-      image_url: '/placeholder-product.jpg',
-      stock_quantity: 12,
-      is_active: true
-    },
-    {
-      id: '6',
-      name: 'Rope Tug Toy',
-      description: 'Durable cotton rope toy perfect for interactive play and teeth cleaning. Great for active dogs.',
-      price: 15.99,
-      category: 'Toys & Enrichment',
-      image_url: '/placeholder-product.jpg',
-      stock_quantity: 18,
-      is_active: true
-    }
-  ]
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -96,14 +33,13 @@ export default function ProductGrid() {
 
       if (error) {
         console.error('Error fetching products:', error)
-        // Use sample products if database is not set up
-        setProducts(sampleProducts)
+        setProducts([])
       } else {
-        setProducts(data || sampleProducts)
+        setProducts(data || [])
       }
     } catch (err) {
       console.error('Error:', err)
-      setProducts(sampleProducts)
+      setProducts([])
     } finally {
       setLoading(false)
     }
@@ -145,6 +81,22 @@ export default function ProductGrid() {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (products.length === 0) {
+    return (
+      <div className="text-center py-16">
+        <div className="bg-white rounded-xl shadow-lg p-12">
+          <h2 className="text-2xl font-bold text-neutral-900 mb-4">No Products Available</h2>
+          <p className="text-neutral-600 mb-6">
+            We're currently updating our product catalog. Check back soon for premium pet products!
+          </p>
+          <p className="text-sm text-neutral-500">
+            Contact us if you're looking for something specific.
+          </p>
         </div>
       </div>
     )

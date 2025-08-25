@@ -28,7 +28,7 @@ export default function AdminSidebar() {
   ]
 
   return (
-    <div className="bg-neutral-900 text-white w-64 min-h-screen p-6">
+    <div className="bg-neutral-900 text-white w-64 h-screen flex flex-col p-6">
       {/* Logo */}
       <Link href="/admin" className="flex items-center space-x-3 mb-8">
         <Image
@@ -45,7 +45,7 @@ export default function AdminSidebar() {
       </Link>
 
       {/* Navigation */}
-      <nav className="space-y-2">
+      <nav className="flex-1 space-y-2">
         {navigation.map((item) => {
           const isActive = pathname === item.href
           const Icon = item.icon
@@ -68,31 +68,29 @@ export default function AdminSidebar() {
       </nav>
 
       {/* User Section */}
-      <div className="absolute bottom-6 left-6 right-6">
-        <div className="border-t border-neutral-800 pt-6">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-medium">A</span>
-            </div>
-            <div>
-              <p className="text-white font-medium">Admin</p>
-              <p className="text-neutral-400 text-sm">Administrator</p>
-            </div>
+      <div className="border-t border-neutral-800 pt-6 mt-6">
+        <div className="flex items-center space-x-3 mb-4">
+          <div className="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center">
+            <span className="text-white font-medium">A</span>
           </div>
-          
-          <button 
-            onClick={async () => {
-              const { createClient } = await import('@/lib/supabase/client')
-              const supabase = createClient()
-              await supabase.auth.signOut()
-              window.location.href = '/admin/login'
-            }}
-            className="flex items-center space-x-3 text-neutral-300 hover:text-white transition-colors w-full"
-          >
-            <LogOut className="h-4 w-4" />
-            <span>Sign Out</span>
-          </button>
+          <div>
+            <p className="text-white font-medium">Admin</p>
+            <p className="text-neutral-400 text-sm">Administrator</p>
+          </div>
         </div>
+        
+        <button 
+          onClick={async () => {
+            const { createClient } = await import('@/lib/supabase/client')
+            const supabase = createClient()
+            await supabase.auth.signOut()
+            window.location.href = '/admin-login'
+          }}
+          className="flex items-center space-x-3 text-neutral-300 hover:text-white transition-colors w-full"
+        >
+          <LogOut className="h-4 w-4" />
+          <span>Sign Out</span>
+        </button>
       </div>
     </div>
   )

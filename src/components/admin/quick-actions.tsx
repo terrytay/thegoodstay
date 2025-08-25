@@ -1,7 +1,69 @@
+'use client'
+
 import Link from 'next/link'
+import { useState, useEffect, useCallback } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { Plus, Package, Calendar, Users, BarChart3, Settings } from 'lucide-react'
 
+interface Stats {
+  lowStockCount: number
+  pendingBookingsCount: number
+  weeklyRevenue: number
+}
+
 export default function QuickActions() {
+  const [stats, setStats] = useState<Stats>({
+    lowStockCount: 0,
+    pendingBookingsCount: 0,
+    weeklyRevenue: 0
+  })
+  const [loading, setLoading] = useState(true)
+
+  const fetchStats = useCallback(async () => {
+    try {
+      const supabase = createClient()
+      
+      // Get low stock count
+      const { data: lowStockProducts } = await supabase
+        .from('products')
+        .select('id')
+        .lte('stock_quantity', 5)
+        .eq('is_active', true)
+
+      // Get pending bookings count
+      const { data: pendingBookings } = await supabase
+        .from('bookings')
+        .select('id')
+        .eq('status', 'pending')
+
+      // Get weekly revenue (orders from last 7 days)
+      const weekAgo = new Date()
+      weekAgo.setDate(weekAgo.getDate() - 7)
+      
+      const { data: weeklyOrders } = await supabase
+        .from('orders')
+        .select('total_amount')
+        .gte('created_at', weekAgo.toISOString())
+        .eq('status', 'completed')
+
+      const weeklyRevenue = weeklyOrders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0
+
+      setStats({
+        lowStockCount: lowStockProducts?.length || 0,
+        pendingBookingsCount: pendingBookings?.length || 0,
+        weeklyRevenue
+      })
+    } catch (err) {
+      console.error('Error fetching stats:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchStats()
+  }, [fetchStats])
+
   const actions = [
     {
       name: 'Add Product',
@@ -33,24 +95,24 @@ export default function QuickActions() {
     }
   ]
 
-  const stats = [
+  const dashboardStats = [
     {
       name: 'Low Stock Items',
-      value: '3',
+      value: loading ? '...' : stats.lowStockCount.toString(),
       description: 'Items running low',
       href: '/admin/products?filter=low-stock',
-      urgent: true
+      urgent: stats.lowStockCount > 0
     },
     {
       name: 'Pending Bookings',
-      value: '5',
+      value: loading ? '...' : stats.pendingBookingsCount.toString(),
       description: 'Awaiting confirmation',
       href: '/admin/bookings?status=pending',
-      urgent: true
+      urgent: stats.pendingBookingsCount > 0
     },
     {
       name: 'This Week',
-      value: '$1,240',
+      value: loading ? '...' : `$${stats.weeklyRevenue.toFixed(2)}`,
       description: 'Revenue so far',
       href: '/admin/analytics',
       urgent: false
@@ -88,7 +150,7 @@ export default function QuickActions() {
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
         <h2 className="text-lg font-semibold text-neutral-900 mb-4">Attention Needed</h2>
         <div className="space-y-4">
-          {stats.map((stat, index) => (
+          {dashboardStats.map((stat, index) => (
             <Link
               key={index}
               href={stat.href}

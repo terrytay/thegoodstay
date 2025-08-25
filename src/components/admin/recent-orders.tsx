@@ -1,49 +1,49 @@
+'use client'
+
 import Link from 'next/link'
+import { useState, useEffect, useCallback } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { Eye, MoreHorizontal } from 'lucide-react'
 
+interface Order {
+  id: string
+  total_amount: number
+  status: string
+  created_at: string
+  customer_name: string | null
+  customer_email: string | null
+}
+
 export default function RecentOrders() {
-  const orders = [
-    {
-      id: '#1234',
-      customer: 'Sarah Johnson',
-      email: 'sarah@example.com',
-      total: 67.98,
-      status: 'delivered',
-      date: '2024-01-15'
-    },
-    {
-      id: '#1235',
-      customer: 'Michael Chen',
-      email: 'michael@example.com',
-      total: 43.99,
-      status: 'processing',
-      date: '2024-01-15'
-    },
-    {
-      id: '#1236',
-      customer: 'Emily Rodriguez',
-      email: 'emily@example.com',
-      total: 89.97,
-      status: 'shipped',
-      date: '2024-01-14'
-    },
-    {
-      id: '#1237',
-      customer: 'David Thompson',
-      email: 'david@example.com',
-      total: 32.99,
-      status: 'pending',
-      date: '2024-01-14'
-    },
-    {
-      id: '#1238',
-      customer: 'Lisa Wang',
-      email: 'lisa@example.com',
-      total: 156.94,
-      status: 'delivered',
-      date: '2024-01-13'
+  const [orders, setOrders] = useState<Order[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchRecentOrders = useCallback(async () => {
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(5)
+
+      if (error) {
+        console.error('Error fetching orders:', error)
+        setOrders([])
+      } else {
+        setOrders(data || [])
+      }
+    } catch (err) {
+      console.error('Error:', err)
+      setOrders([])
+    } finally {
+      setLoading(false)
     }
-  ]
+  }, [])
+
+  useEffect(() => {
+    fetchRecentOrders()
+  }, [fetchRecentOrders])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -58,6 +58,36 @@ export default function RecentOrders() {
       default:
         return 'bg-neutral-100 text-neutral-800'
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-xl shadow-sm border border-neutral-200">
+        <div className="px-6 py-4 border-b border-neutral-200">
+          <h2 className="text-lg font-semibold text-neutral-900">Recent Orders</h2>
+        </div>
+        <div className="p-6">
+          <div className="animate-pulse space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-16 bg-neutral-200 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (orders.length === 0) {
+    return (
+      <div className="bg-white rounded-xl shadow-sm border border-neutral-200">
+        <div className="px-6 py-4 border-b border-neutral-200">
+          <h2 className="text-lg font-semibold text-neutral-900">Recent Orders</h2>
+        </div>
+        <div className="p-12 text-center">
+          <p className="text-neutral-600">No orders yet. Orders will appear here once customers make purchases.</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -102,16 +132,16 @@ export default function RecentOrders() {
             {orders.map((order) => (
               <tr key={order.id} className="hover:bg-neutral-50">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="font-medium text-neutral-900">{order.id}</div>
+                  <div className="font-medium text-neutral-900">#{order.id.substring(0, 8)}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div>
-                    <div className="font-medium text-neutral-900">{order.customer}</div>
-                    <div className="text-sm text-neutral-500">{order.email}</div>
+                    <div className="font-medium text-neutral-900">{order.customer_name || 'Guest'}</div>
+                    <div className="text-sm text-neutral-500">{order.customer_email || 'N/A'}</div>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="font-medium text-neutral-900">${order.total.toFixed(2)}</div>
+                  <div className="font-medium text-neutral-900">${order.total_amount.toFixed(2)}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full capitalize ${getStatusColor(order.status)}`}>
@@ -119,7 +149,7 @@ export default function RecentOrders() {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
-                  {new Date(order.date).toLocaleDateString()}
+                  {new Date(order.created_at).toLocaleDateString()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex items-center space-x-2">

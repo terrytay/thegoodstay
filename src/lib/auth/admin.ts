@@ -8,7 +8,7 @@ export async function requireAdmin() {
     const { data: { user }, error: userError } = await supabase.auth.getUser()
     
     if (userError || !user) {
-      redirect('/admin/login')
+      redirect('/admin-login')
     }
 
     // Check if user has admin role - use raw_user_meta_data
@@ -22,7 +22,7 @@ export async function requireAdmin() {
     return user
   } catch (error) {
     console.error('Admin auth error:', error)
-    redirect('/admin/login')
+    redirect('/admin-login')
   }
 }
 
