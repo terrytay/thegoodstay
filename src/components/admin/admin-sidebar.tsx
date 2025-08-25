@@ -1,33 +1,32 @@
-'use client'
+"use client";
 
-import Image from 'next/image'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { 
-  Home, 
-  ShoppingBag, 
-  Package, 
-  Calendar, 
-  Users, 
-  BarChart3, 
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  Home,
+  ShoppingBag,
+  Package,
+  Calendar,
+  Users,
+  BarChart3,
   Settings,
   LogOut,
-  FileText
-} from 'lucide-react'
+  FileText,
+} from "lucide-react";
 
 export default function AdminSidebar() {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   const navigation = [
-    { name: 'Dashboard', href: '/admin', icon: Home },
-    { name: 'Pages', href: '/admin/pages', icon: FileText },
-    { name: 'Products', href: '/admin/products', icon: Package },
-    { name: 'Orders', href: '/admin/orders', icon: ShoppingBag },
-    { name: 'Bookings', href: '/admin/bookings', icon: Calendar },
-    { name: 'Customers', href: '/admin/customers', icon: Users },
-    { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
-    { name: 'Settings', href: '/admin/settings', icon: Settings },
-  ]
+    { name: "Dashboard", href: "/admin", icon: Home },
+    { name: "Products", href: "/admin/products", icon: Package },
+    { name: "Orders", href: "/admin/orders", icon: ShoppingBag },
+    { name: "Bookings", href: "/admin/bookings", icon: Calendar },
+    { name: "Customers", href: "/admin/customers", icon: Users },
+    { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+    { name: "Settings", href: "/admin/settings", icon: Settings },
+  ];
 
   return (
     <div className="bg-neutral-900 text-white w-64 h-screen flex flex-col p-6">
@@ -49,23 +48,23 @@ export default function AdminSidebar() {
       {/* Navigation */}
       <nav className="flex-1 space-y-2">
         {navigation.map((item) => {
-          const isActive = pathname === item.href
-          const Icon = item.icon
-          
+          const isActive = pathname === item.href;
+          const Icon = item.icon;
+
           return (
             <Link
               key={item.name}
               href={item.href}
               className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
                 isActive
-                  ? 'bg-amber-600 text-white'
-                  : 'text-neutral-300 hover:bg-neutral-800 hover:text-white'
+                  ? "bg-amber-600 text-white"
+                  : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
               <Icon className="h-5 w-5" />
               <span>{item.name}</span>
             </Link>
-          )
+          );
         })}
       </nav>
 
@@ -80,13 +79,13 @@ export default function AdminSidebar() {
             <p className="text-neutral-400 text-sm">Administrator</p>
           </div>
         </div>
-        
-        <button 
+
+        <button
           onClick={async () => {
-            const { createClient } = await import('@/lib/supabase/client')
-            const supabase = createClient()
-            await supabase.auth.signOut()
-            window.location.href = '/admin-login'
+            const { createClient } = await import("@/lib/supabase/client");
+            const supabase = createClient();
+            await supabase.auth.signOut();
+            window.location.href = "/admin-login";
           }}
           className="flex items-center space-x-3 text-neutral-300 hover:text-white transition-colors w-full"
         >
@@ -95,5 +94,5 @@ export default function AdminSidebar() {
         </button>
       </div>
     </div>
-  )
+  );
 }
