@@ -93,15 +93,17 @@ CREATE POLICY "Users can update own bookings" ON bookings FOR UPDATE USING (auth
 -- Products policies (public read access)
 CREATE POLICY "Anyone can view active products" ON products FOR SELECT USING (is_active = true);
 
--- Orders policies
-CREATE POLICY "Users can view own orders" ON orders FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can create own orders" ON orders FOR INSERT WITH CHECK (auth.uid() = user_id);
+-- Orders policies (allow anonymous orders and service role access)
+CREATE POLICY "Users can view own orders" ON orders FOR SELECT USING (auth.uid() = user_id OR user_id IS NULL);
+CREATE POLICY "Users can create own orders" ON orders FOR INSERT WITH CHECK (auth.uid() = user_id OR user_id IS NULL);
+CREATE POLICY "Service role can manage orders" ON orders FOR ALL USING (auth.jwt() ->> 'role' = 'service_role');
 
 -- Order items policies
 CREATE POLICY "Users can view own order items" ON order_items 
   FOR SELECT USING (EXISTS (
-    SELECT 1 FROM orders WHERE orders.id = order_items.order_id AND orders.user_id = auth.uid()
+    SELECT 1 FROM orders WHERE orders.id = order_items.order_id AND (orders.user_id = auth.uid() OR orders.user_id IS NULL)
   ));
+CREATE POLICY "Service role can manage order items" ON order_items FOR ALL USING (auth.jwt() ->> 'role' = 'service_role');
 
 -- Reviews policies (public read access for featured reviews)
 CREATE POLICY "Anyone can view featured reviews" ON reviews FOR SELECT USING (is_featured = true);

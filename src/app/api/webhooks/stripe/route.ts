@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe/config'
-import { createClient } from '@/lib/supabase/server'
 import Stripe from 'stripe'
+import { createClient } from '@supabase/supabase-js'
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
 
@@ -21,7 +21,11 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const supabase = await createClient()
+  // Use service role for webhook operations
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
 
   try {
     switch (event.type) {
@@ -47,7 +51,8 @@ export async function POST(request: NextRequest) {
                   stripe_payment_intent_id: session.payment_intent as string,
                   total_amount: orderData.total,
                   status: 'paid',
-                  shipping_address: orderData.shippingAddress
+                  shipping_address: orderData.shippingAddress,
+                  user_id: null // Anonymous order
                 })
                 .select()
                 .single()
@@ -59,7 +64,7 @@ export async function POST(request: NextRequest) {
 
               // Insert order items
               if (order && orderData.items) {
-                const orderItems = orderData.items.map((item: any) => ({
+                const orderItems = orderData.items.map((item: { id: string; quantity: number; price: number }) => ({
                   order_id: order.id,
                   product_id: item.id,
                   quantity: item.quantity,

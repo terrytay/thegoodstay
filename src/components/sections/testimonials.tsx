@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Star, ChevronLeft, ChevronRight, Quote } from 'lucide-react'
 import Image from 'next/image'
 
@@ -38,9 +38,9 @@ export default function Testimonials() {
     }
   ]
 
-  const nextTestimonial = () => {
+  const nextTestimonial = useCallback(() => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length)
-  }
+  }, [testimonials.length])
 
   const prevTestimonial = () => {
     setCurrentIndex((prevIndex) => (prevIndex - 1 + testimonials.length) % testimonials.length)
@@ -49,7 +49,7 @@ export default function Testimonials() {
   useEffect(() => {
     const interval = setInterval(nextTestimonial, 5000)
     return () => clearInterval(interval)
-  }, [])
+  }, [nextTestimonial])
 
   return (
     <section className="py-20 bg-gradient-to-br from-amber-50 to-orange-50">

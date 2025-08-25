@@ -1,6 +1,6 @@
 {
   "functions": {
-    "src/app/api/**/*.ts": {
+    "app/api/**/*.ts": {
       "maxDuration": 30
     }
   },
@@ -38,7 +38,7 @@
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "https://thegoodstay.com"
+          "value": "https://thegoodstay.vercel.app"
         },
         {
           "key": "Access-Control-Allow-Methods",

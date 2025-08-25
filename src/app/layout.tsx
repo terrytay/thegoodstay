@@ -13,12 +13,13 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://thegoodstay.com'),
+  metadataBase: new URL("https://thegoodstay.vercel.app"),
   title: {
     default: "The Good Stay - Professional Dog Boarding & Pet Care",
-    template: "%s | The Good Stay"
+    template: "%s | The Good Stay",
   },
-  description: "Professional dog boarding and pet care services with personalized attention. Book an assessment visit and shop for premium pet treats and accessories. Trusted by 200+ families.",
+  description:
+    "Professional dog boarding and pet care services with personalized attention. Book an assessment visit and shop for premium pet treats and accessories. Trusted by 200+ families.",
   keywords: [
     "dog boarding",
     "pet care",
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
     "dog daycare",
     "pet services",
     "professional pet care",
-    "dog boarding near me"
+    "dog boarding near me",
   ],
   authors: [{ name: "The Good Stay" }],
   creator: "The Good Stay",
@@ -38,10 +39,11 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://thegoodstay.com",
+    url: "https://thegoodstay.vercel.app",
     siteName: "The Good Stay",
     title: "The Good Stay - Professional Dog Boarding & Pet Care",
-    description: "Professional dog boarding and pet care services with personalized attention. Trusted by 200+ families.",
+    description:
+      "Professional dog boarding and pet care services with personalized attention. Trusted by 200+ families.",
     images: [
       {
         url: "/logo.jpg",
@@ -56,7 +58,8 @@ export const metadata: Metadata = {
     site: "@thegoodstay",
     creator: "@thegoodstay",
     title: "The Good Stay - Professional Dog Boarding & Pet Care",
-    description: "Professional dog boarding and pet care services with personalized attention. Trusted by 200+ families.",
+    description:
+      "Professional dog boarding and pet care services with personalized attention. Trusted by 200+ families.",
     images: ["/logo.jpg"],
   },
   robots: {
@@ -65,13 +68,13 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
   },
   verification: {
-    google: 'your-google-verification-code',
+    google: "your-google-verification-code",
   },
 };
 

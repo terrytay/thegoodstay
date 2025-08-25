@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import Image from 'next/image'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Edit, Trash2, Eye, MoreHorizontal, AlertTriangle } from 'lucide-react'
@@ -24,8 +23,9 @@ export default function ProductsTable() {
   const [loading, setLoading] = useState(true)
   const [selectedProducts, setSelectedProducts] = useState<string[]>([])
 
-  // Sample products for demonstration
-  const sampleProducts: Product[] = [
+  const fetchProducts = useCallback(async () => {
+    // Sample products for demonstration
+    const sampleProducts: Product[] = [
     {
       id: '1',
       name: 'Premium Salmon Treats',
@@ -86,13 +86,8 @@ export default function ProductsTable() {
       created_at: '2024-01-11T10:00:00Z',
       updated_at: '2024-01-11T10:00:00Z'
     }
-  ]
+    ]
 
-  useEffect(() => {
-    fetchProducts()
-  }, [])
-
-  const fetchProducts = async () => {
     try {
       const supabase = createClient()
       const { data, error } = await supabase
@@ -112,7 +107,11 @@ export default function ProductsTable() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    fetchProducts()
+  }, [fetchProducts])
 
   const toggleProductStatus = async (id: string, currentStatus: boolean) => {
     // TODO: Implement status toggle with Supabase

@@ -80,7 +80,15 @@ export default function AdminSidebar() {
             </div>
           </div>
           
-          <button className="flex items-center space-x-3 text-neutral-300 hover:text-white transition-colors w-full">
+          <button 
+            onClick={async () => {
+              const { createClient } = await import('@/lib/supabase/client')
+              const supabase = createClient()
+              await supabase.auth.signOut()
+              window.location.href = '/admin/login'
+            }}
+            className="flex items-center space-x-3 text-neutral-300 hover:text-white transition-colors w-full"
+          >
             <LogOut className="h-4 w-4" />
             <span>Sign Out</span>
           </button>

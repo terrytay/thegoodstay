@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Calendar, Clock, User, Dog, FileText, Phone, Mail, CheckCircle } from 'lucide-react'
+import { Calendar, User, Dog, FileText, CheckCircle } from 'lucide-react'
 
 interface FormData {
   fullName: string
@@ -56,11 +56,11 @@ export default function BookingForm() {
         console.log('No authenticated user, proceeding with anonymous booking')
       }
 
-      // Insert booking
+      // Insert booking (allow anonymous bookings by setting user_id to null)
       const { error: bookingError } = await supabase
         .from('bookings')
         .insert({
-          user_id: user?.user?.id || null,
+          user_id: null, // Allow anonymous bookings
           dog_name: formData.dogName,
           dog_breed: formData.dogBreed,
           dog_age: parseInt(formData.dogAge) || null,

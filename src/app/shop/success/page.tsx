@@ -1,40 +1,44 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Navigation from '@/components/navigation'
 import Footer from '@/components/footer'
 import Link from 'next/link'
 import { CheckCircle, Package, Truck, Mail } from 'lucide-react'
 
-export default function SuccessPage() {
+function SuccessContent() {
   const searchParams = useSearchParams()
   const sessionId = searchParams.get('session_id')
-  const [orderData, setOrderData] = useState<any>(null)
+  const [orderData, setOrderData] = useState<{
+    payment_status: string;
+    amount_total: number;
+    customer_email?: string;
+  } | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const fetchOrderData = async () => {
+      try {
+        const response = await fetch(`/api/checkout?session_id=${sessionId}`)
+        const data = await response.json()
+        
+        if (data.session) {
+          setOrderData(data.session)
+        }
+      } catch (error) {
+        console.error('Error fetching order data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
     if (sessionId) {
       fetchOrderData()
     } else {
       setLoading(false)
     }
   }, [sessionId])
-
-  const fetchOrderData = async () => {
-    try {
-      const response = await fetch(`/api/checkout?session_id=${sessionId}`)
-      const data = await response.json()
-      
-      if (data.session) {
-        setOrderData(data.session)
-      }
-    } catch (error) {
-      console.error('Error fetching order data:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   if (loading) {
     return (
@@ -241,5 +245,20 @@ export default function SuccessPage() {
       
       <Footer />
     </div>
+  )
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
+          <p className="text-neutral-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <SuccessContent />
+    </Suspense>
   )
 }

@@ -1,8 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Star, ShoppingCart, Heart, Grid, List } from 'lucide-react'
 
@@ -87,11 +85,7 @@ export default function ProductGrid() {
     }
   ]
 
-  useEffect(() => {
-    fetchProducts()
-  }, [])
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       const supabase = createClient()
       const { data, error } = await supabase
@@ -113,7 +107,11 @@ export default function ProductGrid() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    fetchProducts()
+  }, [fetchProducts])
 
   const addToCart = (productId: string) => {
     // TODO: Implement cart functionality

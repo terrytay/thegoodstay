@@ -118,8 +118,12 @@ export async function GET(request: NextRequest) {
     const session = await stripe.checkout.sessions.retrieve(sessionId)
     
     if (session.payment_status === 'paid') {
-      // TODO: Create order in Supabase
-      const supabase = await createClient()
+      // Create order in Supabase using service role for permissions
+      const { createClient } = await import('@supabase/supabase-js')
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
       
       // Parse order data from metadata
       const orderData = JSON.parse(session.metadata?.orderData || '{}')
@@ -131,7 +135,8 @@ export async function GET(request: NextRequest) {
           stripe_payment_intent_id: session.payment_intent as string,
           total_amount: orderData.total,
           status: 'paid',
-          shipping_address: orderData.shippingAddress
+          shipping_address: orderData.shippingAddress,
+          user_id: null // Anonymous order
         })
         .select()
         .single()
