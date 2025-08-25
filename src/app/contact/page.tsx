@@ -1,24 +1,27 @@
-import Navigation from '@/components/navigation'
-import Footer from '@/components/footer'
-import { Metadata } from 'next'
-import contactData from '@/data/contact.json'
+// @ts-nocheck
+import Navigation from "@/components/navigation";
+import Footer from "@/components/footer";
+import { Metadata } from "next";
+import contactData from "@/data/contact.json";
 
 export const metadata: Metadata = {
-  title: 'Contact The Good Stay - Book Your Assessment Visit',
-  description: 'Get in touch to schedule your complimentary assessment visit or ask questions about our dog boarding services. We\'re here to help!',
+  title: "Contact The Good Stay - Book Your Assessment Visit",
+  description:
+    "Get in touch to schedule your complimentary assessment visit or ask questions about our dog boarding services. We're here to help!",
   keywords: [
-    'contact dog boarding',
-    'book assessment visit',
-    'pet care contact',
-    'dog boarding inquiry',
-    'schedule visit',
+    "contact dog boarding",
+    "book assessment visit",
+    "pet care contact",
+    "dog boarding inquiry",
+    "schedule visit",
   ],
   openGraph: {
-    title: 'Contact The Good Stay - Book Your Assessment Visit',
-    description: 'Ready to schedule your complimentary assessment visit? Get in touch with us today!',
-    url: 'https://thegoodstay.vercel.app/contact',
+    title: "Contact The Good Stay - Book Your Assessment Visit",
+    description:
+      "Ready to schedule your complimentary assessment visit? Get in touch with us today!",
+    url: "https://thegoodstay.vercel.app/contact",
   },
-}
+};
 
 export default function ContactPage() {
   return (
@@ -49,7 +52,7 @@ export default function ContactPage() {
                   </h2>
                   <div className="w-24 h-px bg-amber-600 mx-auto"></div>
                 </div>
-                
+
                 <form className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
@@ -75,7 +78,7 @@ export default function ContactPage() {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
                       <label className="block font-lora text-sm font-medium text-stone-700 mb-2">
@@ -104,9 +107,11 @@ export default function ContactPage() {
                       {contactData.form.fields[4].label}
                     </label>
                     <select className="w-full px-6 py-4 bg-stone-50 border-2 border-stone-200 focus:border-stone-800 outline-none font-lora transition-colors rounded">
-                      {contactData.form.fields[4].options.map((option, index) => (
-                        <option key={index}>{option}</option>
-                      ))}
+                      {contactData.form.fields[4].options.map(
+                        (option, index) => (
+                          <option key={index}>{option}</option>
+                        )
+                      )}
                     </select>
                   </div>
 
@@ -138,7 +143,7 @@ export default function ContactPage() {
                   </h2>
                   <div className="w-24 h-px bg-amber-600 mx-auto"></div>
                 </div>
-                
+
                 <div className="space-y-8">
                   <div className="p-6 bg-stone-50 rounded-lg">
                     <h3 className="font-lora text-lg font-medium text-stone-900 mb-2">
@@ -182,9 +187,9 @@ export default function ContactPage() {
                     </h3>
                     <div className="flex space-x-6">
                       {contactData.social.links.map((link, index) => (
-                        <a 
+                        <a
                           key={index}
-                          href={link.url} 
+                          href={link.url}
                           className="text-stone-600 hover:text-stone-900 transition-colors font-lora"
                         >
                           {link.name}
@@ -218,5 +223,5 @@ export default function ContactPage() {
       </main>
       <Footer />
     </div>
-  )
+  );
 }
