@@ -10,7 +10,6 @@ interface FormData {
   fullName: string;
   email: string;
   phone: string;
-  countryCode: string;
   dogName: string;
   dogBreed: string;
   dogAge: string;
