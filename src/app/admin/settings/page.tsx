@@ -457,7 +457,43 @@ export default function SettingsPage() {
                 <h2 className="text-xl font-semibold text-neutral-900 mb-6">Booking Settings</h2>
                 
                 <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-700 mb-2">Booking Start Time</label>
+                      <input
+                        type="time"
+                        value={businessSettings.bookingSettings.startTime || '09:00'}
+                        onChange={(e) => setBusinessSettings({
+                          ...businessSettings,
+                          bookingSettings: {
+                            ...businessSettings.bookingSettings,
+                            startTime: e.target.value
+                          }
+                        })}
+                        className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      />
+                      <p className="text-xs text-neutral-500 mt-1">Earliest time customers can book visits</p>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-700 mb-2">Booking End Time</label>
+                      <input
+                        type="time"
+                        value={businessSettings.bookingSettings.endTime || '17:00'}
+                        onChange={(e) => setBusinessSettings({
+                          ...businessSettings,
+                          bookingSettings: {
+                            ...businessSettings.bookingSettings,
+                            endTime: e.target.value
+                          }
+                        })}
+                        className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      />
+                      <p className="text-xs text-neutral-500 mt-1">Latest time customers can book visits</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-neutral-700 mb-2">Advance Booking (Days)</label>
                       <input
@@ -496,22 +532,45 @@ export default function SettingsPage() {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium text-neutral-700 mb-2">Booking Buffer (Minutes)</label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="60"
-                        step="5"
-                        value={businessSettings.bookingSettings.bookingBuffer}
+                      <label className="block text-sm font-medium text-neutral-700 mb-2">Time Interval (Minutes)</label>
+                      <select
+                        value={businessSettings.bookingSettings.timeInterval || 60}
                         onChange={(e) => setBusinessSettings({
                           ...businessSettings,
                           bookingSettings: {
                             ...businessSettings.bookingSettings,
-                            bookingBuffer: parseInt(e.target.value) || 15
+                            timeInterval: parseInt(e.target.value)
                           }
                         })}
                         className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                      />
+                      >
+                        <option value="30">30 minutes</option>
+                        <option value="60">1 hour</option>
+                        <option value="90">1.5 hours</option>
+                        <option value="120">2 hours</option>
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-700 mb-2">Minimum Advance (Hours)</label>
+                      <select
+                        value={businessSettings.bookingSettings.minAdvanceHours || 3}
+                        onChange={(e) => setBusinessSettings({
+                          ...businessSettings,
+                          bookingSettings: {
+                            ...businessSettings.bookingSettings,
+                            minAdvanceHours: parseInt(e.target.value)
+                          }
+                        })}
+                        className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      >
+                        <option value="1">1 hour</option>
+                        <option value="2">2 hours</option>
+                        <option value="3">3 hours</option>
+                        <option value="6">6 hours</option>
+                        <option value="12">12 hours</option>
+                        <option value="24">24 hours</option>
+                      </select>
                     </div>
                   </div>
 

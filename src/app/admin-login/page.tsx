@@ -1,15 +1,15 @@
-import AdminLoginForm from '@/components/admin/admin-login-form'
-import Image from 'next/image'
-import { Metadata } from 'next'
+import AdminLoginForm from "@/components/admin/admin-login-form";
+import Image from "next/image";
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'Admin Login',
-  description: 'Login to The Good Stay admin dashboard',
+  title: "Admin Login",
+  description: "Login to The Good Stay admin dashboard",
   robots: {
     index: false,
-    follow: false
-  }
-}
+    follow: false,
+  },
+};
 
 export default function AdminLoginPage() {
   return (
@@ -27,7 +27,9 @@ export default function AdminLoginPage() {
                 className="rounded-lg"
               />
             </div>
-            <h1 className="text-2xl font-bold text-neutral-900 mb-2">Admin Login</h1>
+            <h1 className="text-2xl font-bold text-neutral-900 mb-2">
+              Admin Login
+            </h1>
             <p className="text-neutral-600">Access your dashboard</p>
           </div>
 
@@ -37,11 +39,9 @@ export default function AdminLoginPage() {
 
         {/* Footer */}
         <div className="text-center mt-6">
-          <p className="text-neutral-500 text-sm">
-            © 2024 The Good Stay. Admin Access Only.
-          </p>
+          <p className="text-neutral-500 text-sm">© 2025 The Good Stay</p>
         </div>
       </div>
     </div>
-  )
+  );
 }

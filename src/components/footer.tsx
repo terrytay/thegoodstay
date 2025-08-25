@@ -1,6 +1,6 @@
-import Image from 'next/image'
-import Link from 'next/link'
-import { MapPin, Phone, Mail, Calendar, Heart } from 'lucide-react'
+import Image from "next/image";
+import Link from "next/link";
+import { MapPin, Phone, Mail, Calendar, Heart } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -18,21 +18,26 @@ export default function Footer() {
                 className="rounded-lg"
               />
               <div>
-                <h3 className="text-2xl font-playfair font-bold">The Good Stay</h3>
-                <p className="text-neutral-400">Your dog&apos;s home away from home</p>
+                <h3 className="text-2xl font-playfair font-bold">
+                  The Good Stay
+                </h3>
+                <p className="text-neutral-400">
+                  Wholesome living made for the goodest lives
+                </p>
               </div>
             </div>
-            
+
             <p className="text-neutral-300 mb-6 max-w-md">
-              Professional dog boarding and care services with personalized attention. 
-              Every dog deserves to feel loved and comfortable while their family is away.
+              Professional dog boarding and care services with personalized
+              attention. Every dog deserves to feel loved and comfortable while
+              their family is away.
             </p>
 
             {/* Contact Info */}
             <div className="space-y-3">
               <div className="flex items-center space-x-3 text-neutral-300">
                 <Phone className="h-5 w-5 text-amber-400" />
-                <span>(555) 123-4567</span>
+                <span>(65) 9389 6862</span>
               </div>
               <div className="flex items-center space-x-3 text-neutral-300">
                 <Mail className="h-5 w-5 text-amber-400" />
@@ -40,7 +45,7 @@ export default function Footer() {
               </div>
               <div className="flex items-center space-x-3 text-neutral-300">
                 <MapPin className="h-5 w-5 text-amber-400" />
-                <span>Your Local Area</span>
+                <span>Singapore</span>
               </div>
             </div>
           </div>
@@ -50,27 +55,42 @@ export default function Footer() {
             <h4 className="text-lg font-semibold mb-6">Quick Links</h4>
             <ul className="space-y-3">
               <li>
-                <Link href="/" className="text-neutral-300 hover:text-amber-400 transition-colors">
+                <Link
+                  href="/"
+                  className="text-neutral-300 hover:text-amber-400 transition-colors"
+                >
                   Home
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="text-neutral-300 hover:text-amber-400 transition-colors">
+                <Link
+                  href="/about"
+                  className="text-neutral-300 hover:text-amber-400 transition-colors"
+                >
                   About
                 </Link>
               </li>
               <li>
-                <Link href="/services" className="text-neutral-300 hover:text-amber-400 transition-colors">
+                <Link
+                  href="/services"
+                  className="text-neutral-300 hover:text-amber-400 transition-colors"
+                >
                   Services
                 </Link>
               </li>
               <li>
-                <Link href="/shop" className="text-neutral-300 hover:text-amber-400 transition-colors">
+                <Link
+                  href="/shop"
+                  className="text-neutral-300 hover:text-amber-400 transition-colors"
+                >
                   Shop
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-neutral-300 hover:text-amber-400 transition-colors">
+                <Link
+                  href="/contact"
+                  className="text-neutral-300 hover:text-amber-400 transition-colors"
+                >
                   Contact
                 </Link>
               </li>
@@ -82,28 +102,19 @@ export default function Footer() {
             <h4 className="text-lg font-semibold mb-6">Services</h4>
             <ul className="space-y-3">
               <li>
-                <Link href="/book-assessment" className="text-neutral-300 hover:text-amber-400 transition-colors">
+                <Link
+                  href="/book-assessment"
+                  className="text-neutral-300 hover:text-amber-400 transition-colors"
+                >
                   Assessment Visits
                 </Link>
               </li>
               <li>
-                <Link href="/services/boarding" className="text-neutral-300 hover:text-amber-400 transition-colors">
-                  Dog Boarding
-                </Link>
-              </li>
-              <li>
-                <Link href="/services/daycare" className="text-neutral-300 hover:text-amber-400 transition-colors">
-                  Day Care
-                </Link>
-              </li>
-              <li>
-                <Link href="/shop/treats" className="text-neutral-300 hover:text-amber-400 transition-colors">
-                  Premium Treats
-                </Link>
-              </li>
-              <li>
-                <Link href="/shop/accessories" className="text-neutral-300 hover:text-amber-400 transition-colors">
-                  Accessories
+                <Link
+                  href="/shop"
+                  className="text-neutral-300 hover:text-amber-400 transition-colors"
+                >
+                  Premium Treats & Accessories
                 </Link>
               </li>
             </ul>
@@ -117,7 +128,8 @@ export default function Footer() {
               Ready to Give Your Dog The Good Stay?
             </h3>
             <p className="text-amber-100 mb-6 max-w-2xl mx-auto">
-              Start with a complimentary assessment visit to see if we&apos;re the perfect match for your furry friend.
+              Start with a complimentary assessment visit to see if we&apos;re
+              the perfect match for your furry friend.
             </p>
             <Link
               href="/book-assessment"
@@ -146,9 +158,10 @@ export default function Footer() {
               />
             </a>
           </div>
-          
+
           <p className="text-neutral-400 text-sm">
-            Follow @thegoodstay for daily updates and adorable photos of our furry guests!
+            Follow @thegoodstay for daily updates and adorable photos of our
+            furry guests!
           </p>
         </div>
       </div>
@@ -158,15 +171,21 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-neutral-400 text-sm">
-              © 2024 The Good Stay. All rights reserved. Made with{' '}
+              © 2025 The Good Stay. All rights reserved. Made with{" "}
               <Heart className="inline h-4 w-4 text-red-500 mx-1" />
               for dogs everywhere.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link href="/privacy" className="text-neutral-400 hover:text-amber-400 text-sm transition-colors">
+              <Link
+                href="/privacy"
+                className="text-neutral-400 hover:text-amber-400 text-sm transition-colors"
+              >
                 Privacy Policy
               </Link>
-              <Link href="/terms" className="text-neutral-400 hover:text-amber-400 text-sm transition-colors">
+              <Link
+                href="/terms"
+                className="text-neutral-400 hover:text-amber-400 text-sm transition-colors"
+              >
                 Terms of Service
               </Link>
             </div>
@@ -174,5 +193,5 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }

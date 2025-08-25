@@ -1,0 +1,75 @@
+{
+  "hero": {
+    "title": "Premium Pet Essentials",
+    "subtitle": "Carefully curated products for your beloved companion's comfort, health, and happiness. Every item is personally tested and approved.",
+    "backgroundImage": "/images/shop-hero.jpg"
+  },
+  "features": [
+    {
+      "icon": "star",
+      "title": "Premium Quality",
+      "description": "Only the finest materials and ingredients",
+      "color": "amber"
+    },
+    {
+      "icon": "heart",
+      "title": "Dog Approved",
+      "description": "Tested and loved by our furry friends",
+      "color": "red"
+    },
+    {
+      "icon": "award",
+      "title": "Personally Tested",
+      "description": "Every product is tried and trusted by us",
+      "color": "green"
+    }
+  ],
+  "products": [
+    {
+      "id": 1,
+      "name": "Premium Dog Treats",
+      "price": "$24.95",
+      "image": "/images/dog-treats.jpg",
+      "description": "Locally sourced, organic treats your dog will love"
+    },
+    {
+      "id": 2,
+      "name": "Comfort Dog Bed",
+      "price": "$89.95",
+      "image": "/images/dog-bed.jpg",
+      "description": "Luxurious comfort for your pet's best sleep"
+    },
+    {
+      "id": 3,
+      "name": "Interactive Toy Set",
+      "price": "$34.95",
+      "image": "/images/dog-toys.jpg",
+      "description": "Mental stimulation and hours of entertainment"
+    },
+    {
+      "id": 4,
+      "name": "Natural Grooming Kit",
+      "price": "$56.95",
+      "image": "/images/grooming-kit.jpg",
+      "description": "Everything you need for at-home grooming"
+    },
+    {
+      "id": 5,
+      "name": "Travel Carrier",
+      "price": "$124.95",
+      "image": "/images/carrier.jpg",
+      "description": "Safe and comfortable travel for your companion"
+    },
+    {
+      "id": 6,
+      "name": "Feeding Bowl Set",
+      "price": "$42.95",
+      "image": "/images/bowls.jpg",
+      "description": "Stylish stainless steel feeding solution"
+    }
+  ],
+  "newsletter": {
+    "title": "Stay Connected",
+    "subtitle": "Subscribe to receive updates on new products and special offers for The Good Stay community"
+  }
+}

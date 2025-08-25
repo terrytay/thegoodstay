@@ -1,16 +1,29 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
-import { Save, ArrowLeft, Upload, X, Image as ImageIcon } from 'lucide-react'
+import { Save, ArrowLeft, Upload, X } from 'lucide-react'
 import Link from 'next/link'
 
-export default function NewProductPage() {
+interface Product {
+  id: string
+  name: string
+  description: string
+  price: number
+  category: string
+  image_url: string
+  stock_quantity: number
+  is_active: boolean
+}
+
+export default function EditProductPage() {
+  const params = useParams()
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [initialLoading, setInitialLoading] = useState(true)
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -33,6 +46,48 @@ export default function NewProductPage() {
     'Other'
   ]
 
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const supabase = createClient()
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', params.id)
+          .single()
+
+        if (error) {
+          console.error('Error fetching product:', error)
+          router.push('/admin/products')
+          return
+        }
+
+        setFormData({
+          name: data.name,
+          description: data.description || '',
+          price: data.price.toString(),
+          category: data.category,
+          stock_quantity: data.stock_quantity.toString(),
+          image_url: data.image_url || '',
+          is_active: data.is_active
+        })
+
+        if (data.image_url) {
+          setImagePreview(data.image_url)
+        }
+      } catch (err) {
+        console.error('Error:', err)
+        router.push('/admin/products')
+      } finally {
+        setInitialLoading(false)
+      }
+    }
+
+    if (params.id) {
+      fetchProduct()
+    }
+  }, [params.id, router])
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
     setFormData(prev => ({
@@ -44,13 +99,11 @@ export default function NewProductPage() {
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      // Validate file type
       if (!file.type.startsWith('image/')) {
         alert('Please select an image file')
         return
       }
 
-      // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         alert('Image size must be less than 5MB')
         return
@@ -58,7 +111,6 @@ export default function NewProductPage() {
 
       setImageFile(file)
       
-      // Create preview
       const reader = new FileReader()
       reader.onload = (e) => {
         setImagePreview(e.target?.result as string)
@@ -81,7 +133,6 @@ export default function NewProductPage() {
       setUploading(true)
       const supabase = createClient()
 
-      // Create unique filename
       const fileExt = file.name.split('.').pop()
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
       
@@ -94,7 +145,6 @@ export default function NewProductPage() {
         return null
       }
 
-      // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('product-images')
         .getPublicUrl(fileName)
@@ -115,7 +165,6 @@ export default function NewProductPage() {
     try {
       let imageUrl = formData.image_url
 
-      // Upload image if selected
       if (imageFile) {
         const uploadedUrl = await uploadImage(imageFile)
         if (uploadedUrl) {
@@ -136,24 +185,40 @@ export default function NewProductPage() {
         category: formData.category,
         stock_quantity: parseInt(formData.stock_quantity) || 0,
         image_url: imageUrl || null,
-        is_active: formData.is_active
+        is_active: formData.is_active,
+        updated_at: new Date().toISOString()
       }
 
       const { error } = await supabase
         .from('products')
-        .insert([productData])
+        .update(productData)
+        .eq('id', params.id)
 
       if (error) {
         throw error
       }
 
-      router.push('/admin/products')
+      router.push(`/admin/products/${params.id}`)
     } catch (err) {
-      console.error('Error creating product:', err)
-      alert('Error creating product. Please try again.')
+      console.error('Error updating product:', err)
+      alert('Error updating product. Please try again.')
     } finally {
       setLoading(false)
     }
+  }
+
+  if (initialLoading) {
+    return (
+      <div className="p-6">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-neutral-200 rounded w-1/4"></div>
+          <div className="space-y-4">
+            <div className="h-32 bg-neutral-200 rounded"></div>
+            <div className="h-32 bg-neutral-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -162,26 +227,26 @@ export default function NewProductPage() {
       <div className="mb-8">
         <div className="flex items-center space-x-4 mb-4">
           <Link
-            href="/admin/products"
+            href={`/admin/products/${params.id}`}
             className="flex items-center space-x-2 text-neutral-600 hover:text-neutral-900"
           >
             <ArrowLeft className="h-4 w-4" />
-            <span>Back to Products</span>
+            <span>Back to Product</span>
           </Link>
         </div>
-        <h1 className="text-2xl font-bold text-neutral-900 mb-2">Add New Product</h1>
-        <p className="text-neutral-600">Create a new product for your shop</p>
+        <h1 className="text-2xl font-bold text-neutral-900 mb-2">Edit Product</h1>
+        <p className="text-neutral-600">Update product information and settings</p>
       </div>
 
       {/* Form */}
-      <div className="max-w-2xl">
+      <div className="max-w-4xl">
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Basic Information */}
             <div>
-              <h3 className="text-lg font-medium text-neutral-900 mb-4">Basic Information</h3>
+              <h3 className="text-lg font-medium text-neutral-900 mb-6">Basic Information</h3>
               
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 gap-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-neutral-700 mb-2">
                     Product Name *
@@ -193,7 +258,7 @@ export default function NewProductPage() {
                     required
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                     placeholder="Enter product name"
                   />
                 </div>
@@ -208,12 +273,12 @@ export default function NewProductPage() {
                     rows={4}
                     value={formData.description}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
                     placeholder="Describe the product..."
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label htmlFor="price" className="block text-sm font-medium text-neutral-700 mb-2">
                       Price ($) *
@@ -227,7 +292,7 @@ export default function NewProductPage() {
                       step="0.01"
                       value={formData.price}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                       placeholder="0.00"
                     />
                   </div>
@@ -244,99 +309,119 @@ export default function NewProductPage() {
                       min="0"
                       value={formData.stock_quantity}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                       placeholder="0"
                     />
                   </div>
-                </div>
 
-                <div>
-                  <label htmlFor="category" className="block text-sm font-medium text-neutral-700 mb-2">
-                    Category *
-                  </label>
-                  <select
-                    id="category"
-                    name="category"
-                    required
-                    value={formData.category}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                  >
-                    <option value="">Select a category</option>
-                    {categories.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </select>
+                  <div>
+                    <label htmlFor="category" className="block text-sm font-medium text-neutral-700 mb-2">
+                      Category *
+                    </label>
+                    <select
+                      id="category"
+                      name="category"
+                      required
+                      value={formData.category}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    >
+                      <option value="">Select a category</option>
+                      {categories.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Media */}
+            {/* Product Image */}
             <div>
-              <h3 className="text-lg font-medium text-neutral-900 mb-4">Product Image</h3>
+              <h3 className="text-lg font-medium text-neutral-900 mb-6">Product Image</h3>
               
-              <div className="space-y-4">
-                {/* Image Upload */}
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">
-                    Upload Image
-                  </label>
-                  
-                  {!imagePreview ? (
+              <div className="space-y-6">
+                {/* Current Image */}
+                {imagePreview && !imageFile && (
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      Current Image
+                    </label>
+                    <div className="relative inline-block">
+                      <img
+                        src={imagePreview}
+                        alt="Current product"
+                        className="w-48 h-48 object-cover rounded-lg border border-neutral-300"
+                      />
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="absolute -top-2 -right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* New Image Upload */}
+                {!imagePreview && (
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      Upload New Image
+                    </label>
                     <div
                       onClick={() => fileInputRef.current?.click()}
                       className="border-2 border-dashed border-neutral-300 rounded-lg p-8 text-center hover:border-amber-500 hover:bg-amber-50 transition-colors cursor-pointer"
                     >
                       <Upload className="h-12 w-12 text-neutral-400 mx-auto mb-4" />
                       <p className="text-sm text-neutral-600 mb-2">
-                        Click to upload an image or drag and drop
+                        Click to upload a new image
                       </p>
                       <p className="text-xs text-neutral-500">
                         PNG, JPG, GIF up to 5MB
                       </p>
                     </div>
-                  ) : (
-                    <div className="relative">
+                  </div>
+                )}
+
+                {/* Image Preview */}
+                {imageFile && imagePreview && (
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      New Image Preview
+                    </label>
+                    <div className="relative inline-block">
                       <img
                         src={imagePreview}
-                        alt="Product preview"
-                        className="w-full h-48 object-cover rounded-lg border border-neutral-300"
+                        alt="New product preview"
+                        className="w-48 h-48 object-cover rounded-lg border border-neutral-300"
                       />
                       <button
                         type="button"
                         onClick={removeImage}
-                        className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
+                        className="absolute -top-2 -right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
                       >
                         <X size={16} />
                       </button>
                     </div>
-                  )}
-                  
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageSelect}
-                    className="hidden"
-                  />
-                </div>
-
-                {/* OR Divider */}
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-neutral-300" />
                   </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-neutral-500">OR</span>
-                  </div>
-                </div>
+                )}
+                
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
 
                 {/* URL Input */}
                 <div>
                   <label htmlFor="image_url" className="block text-sm font-medium text-neutral-700 mb-2">
-                    Image URL
+                    Or use Image URL
                   </label>
                   <input
                     type="url"
@@ -345,19 +430,16 @@ export default function NewProductPage() {
                     value={formData.image_url}
                     onChange={handleChange}
                     disabled={!!imageFile}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-neutral-100 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-neutral-100 disabled:cursor-not-allowed"
                     placeholder="https://example.com/image.jpg"
                   />
-                  <p className="text-xs text-neutral-500 mt-1">
-                    Enter a URL for the product image as an alternative to uploading
-                  </p>
                 </div>
               </div>
             </div>
 
             {/* Settings */}
             <div>
-              <h3 className="text-lg font-medium text-neutral-900 mb-4">Settings</h3>
+              <h3 className="text-lg font-medium text-neutral-900 mb-6">Settings</h3>
               
               <div className="flex items-center">
                 <input
@@ -378,19 +460,19 @@ export default function NewProductPage() {
           {/* Actions */}
           <div className="flex items-center justify-end space-x-4 mt-8 pt-6 border-t border-neutral-200">
             <Link
-              href="/admin/products"
-              className="px-6 py-2 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors"
+              href={`/admin/products/${params.id}`}
+              className="px-6 py-3 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors"
             >
               Cancel
             </Link>
             <button
               type="submit"
               disabled={loading || uploading}
-              className="flex items-center space-x-2 bg-amber-600 text-white px-6 py-2 rounded-lg hover:bg-amber-700 disabled:bg-neutral-400 transition-colors"
+              className="flex items-center space-x-2 bg-amber-600 text-white px-6 py-3 rounded-lg hover:bg-amber-700 disabled:bg-neutral-400 transition-colors"
             >
               <Save className="h-4 w-4" />
               <span>
-                {uploading ? 'Uploading...' : loading ? 'Creating...' : 'Create Product'}
+                {uploading ? 'Uploading...' : loading ? 'Updating...' : 'Update Product'}
               </span>
             </button>
           </div>

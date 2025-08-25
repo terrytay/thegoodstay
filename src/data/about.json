@@ -1,0 +1,50 @@
+{
+  "hero": {
+    "title": "Our Story",
+    "subtitle": "We believe every dog deserves personalized care, genuine love, and the comfort of a home away from home. Our passion for dogs drives everything we do.",
+    "backgroundImage": "/images/about-hero.jpg"
+  },
+  "sections": [
+    {
+      "title": "Why We Started",
+      "content": "After years of struggling to find quality care for our own beloved companions, we realized there was a better way. The Good Stay was born from our desire to create the kind of place we'd want to leave our own dogs – where they're not just cared for, but truly loved.",
+      "image": "/images/our-story.jpg",
+      "layout": "image-right"
+    },
+    {
+      "title": "Our Philosophy",
+      "content": "Every dog is unique, with their own personality, needs, and preferences. That's why we take the time to understand each companion through our complimentary assessment visit. We don't believe in one-size-fits-all care – we believe in care that's tailored specifically to your dog.",
+      "image": "/images/philosophy.jpg",
+      "layout": "image-left"
+    },
+    {
+      "title": "Experience You Can Trust",
+      "content": "With over 8 years of experience in pet care and hundreds of happy families, we've learned what it takes to make dogs feel truly at home. Our approach combines professional expertise with genuine love, ensuring your companion receives the best possible care.",
+      "image": "/images/experience.jpg",
+      "layout": "image-right"
+    }
+  ],
+  "stats": [
+    {
+      "number": "200+",
+      "label": "Happy Families"
+    },
+    {
+      "number": "8+",
+      "label": "Years Experience"
+    },
+    {
+      "number": "24/7",
+      "label": "Emergency Support"
+    },
+    {
+      "number": "100%",
+      "label": "Satisfaction Rate"
+    }
+  ],
+  "testimonial": {
+    "quote": "The Good Stay isn't just a boarding service – they're family. Max gets so excited when he sees us heading in their direction, and I know he's in the most loving hands possible.",
+    "author": "Sarah Johnson",
+    "role": "Dog Parent to Max"
+  }
+}

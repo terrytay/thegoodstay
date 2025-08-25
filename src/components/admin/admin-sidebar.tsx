@@ -11,7 +11,8 @@ import {
   Users, 
   BarChart3, 
   Settings,
-  LogOut
+  LogOut,
+  FileText
 } from 'lucide-react'
 
 export default function AdminSidebar() {
@@ -19,6 +20,7 @@ export default function AdminSidebar() {
 
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: Home },
+    { name: 'Pages', href: '/admin/pages', icon: FileText },
     { name: 'Products', href: '/admin/products', icon: Package },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingBag },
     { name: 'Bookings', href: '/admin/bookings', icon: Calendar },

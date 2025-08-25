@@ -1,37 +1,34 @@
+'use client'
+
 import Navigation from '@/components/navigation'
 import Footer from '@/components/footer'
 import CartItems from '@/components/shop/cart-items'
 import { ShoppingBag } from 'lucide-react'
+import { useCart } from '@/context/cart-context'
 
 export default function CartPage() {
+  const { itemCount } = useCart()
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-stone-50">
       <Navigation />
       
-      <main className="pt-20">
+      <main className="pt-20 md:pt-24">
         {/* Header */}
-        <section className="bg-gradient-to-br from-amber-50 to-orange-50 py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <div className="flex justify-center mb-6">
-                <div className="bg-white p-4 rounded-full shadow-lg">
-                  <ShoppingBag className="h-12 w-12 text-amber-600" />
-                </div>
-              </div>
-              
-              <h1 className="font-playfair text-4xl md:text-5xl font-bold text-neutral-900 mb-6">
-                Shopping Cart
-              </h1>
-              <p className="text-xl text-neutral-600 max-w-2xl mx-auto">
-                Review your selected items and proceed to secure checkout.
-              </p>
-            </div>
+        <section className="bg-gradient-to-br from-amber-50 to-stone-100 py-16">
+          <div className="max-w-4xl mx-auto px-8 lg:px-12 text-center">
+            <h1 className="font-crimson text-4xl md:text-5xl font-normal text-stone-900 mb-4">
+              Your Cart
+            </h1>
+            <p className="font-lora text-lg text-stone-600">
+              {itemCount} {itemCount === 1 ? 'item' : 'items'} in your cart
+            </p>
           </div>
         </section>
 
         {/* Cart Content */}
-        <section className="py-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-16 bg-white">
+          <div className="max-w-6xl mx-auto px-8 lg:px-12">
             <CartItems />
           </div>
         </section>

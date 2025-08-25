@@ -1,0 +1,95 @@
+{
+  "hero": {
+    "title": "Let's Connect",
+    "subtitle": "Ready to give your beloved companion the care they deserve? We'd love to hear from you and answer any questions you may have.",
+    "backgroundImage": "/images/contact-hero.jpg"
+  },
+  "contactInfo": {
+    "phone": {
+      "title": "Phone & WhatsApp",
+      "value": "+65 9123 4567"
+    },
+    "email": {
+      "title": "Email",
+      "value": "hello@thegoodstay.sg"
+    },
+    "location": {
+      "title": "Location",
+      "value": "Singapore\nAvailable for pickup/dropoff island-wide"
+    },
+    "hours": {
+      "title": "Hours",
+      "value": "Monday - Sunday: 7:00 AM - 7:00 PM\nEmergency contact available 24/7"
+    }
+  },
+  "social": {
+    "title": "Follow us",
+    "links": [
+      {
+        "name": "Instagram",
+        "url": "https://instagram.com/thegoodstay.sg"
+      },
+      {
+        "name": "Facebook",
+        "url": "#"
+      }
+    ]
+  },
+  "form": {
+    "title": "Send us a message",
+    "fields": [
+      {
+        "name": "name",
+        "label": "Your Name",
+        "type": "text",
+        "placeholder": "Enter your name",
+        "required": true
+      },
+      {
+        "name": "email",
+        "label": "Email Address",
+        "type": "email",
+        "placeholder": "Enter your email",
+        "required": true
+      },
+      {
+        "name": "phone",
+        "label": "Phone Number",
+        "type": "tel",
+        "placeholder": "Enter your phone"
+      },
+      {
+        "name": "petName",
+        "label": "Pet's Name",
+        "type": "text",
+        "placeholder": "Your pet's name"
+      },
+      {
+        "name": "service",
+        "label": "Service Interest",
+        "type": "select",
+        "options": [
+          "Assessment Visit",
+          "Overnight Boarding",
+          "Day Visits",
+          "General Inquiry"
+        ]
+      },
+      {
+        "name": "message",
+        "label": "Message",
+        "type": "textarea",
+        "placeholder": "Tell us about your pet and what you're looking for...",
+        "rows": 6
+      }
+    ]
+  },
+  "cta": {
+    "title": "Ready to get started?",
+    "subtitle": "Book your complimentary assessment visit today and see why families trust The Good Stay",
+    "button": {
+      "text": "Book Assessment Visit",
+      "url": "/book-assessment"
+    }
+  }
+}

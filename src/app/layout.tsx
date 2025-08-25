@@ -1,15 +1,23 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
+import { Inter, Crimson_Text, Lora } from "next/font/google";
 import "./globals.css";
+import ClientWrapper from '@/components/client-wrapper';
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
 });
 
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
+const crimsonText = Crimson_Text({
+  variable: "--font-crimson",
   subsets: ["latin"],
+  weight: ["400", "600", "700"],
+});
+
+const lora = Lora({
+  variable: "--font-lora",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -86,9 +94,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} ${playfair.variable} font-sans antialiased`}
+        className={`${inter.variable} ${crimsonText.variable} ${lora.variable} font-sans antialiased bg-stone-50`}
       >
-        {children}
+        <ClientWrapper>
+          {children}
+        </ClientWrapper>
       </body>
     </html>
   );

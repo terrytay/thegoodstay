@@ -1,0 +1,106 @@
+{
+  "hero": {
+    "title": "Our Services",
+    "subtitle": "Professional dog boarding and care services designed around your companion's unique needs. Every service begins with understanding your dog's personality and preferences.",
+    "backgroundImage": "/images/services-hero.jpg"
+  },
+  "services": [
+    {
+      "title": "Complimentary Assessment Visit",
+      "description": "Every relationship starts with getting to know each other. During this no-cost visit, we meet your dog in a relaxed setting, understand their personality, preferences, and any special needs.",
+      "features": [
+        "One-on-one meet and greet",
+        "Personality and preference assessment",
+        "Discussion of your dog's routine",
+        "Trial interactions and play time",
+        "Detailed care plan development",
+        "No commitment required"
+      ],
+      "price": "Free",
+      "duration": "60-90 minutes",
+      "image": "/images/assessment-visit.jpg"
+    },
+    {
+      "title": "Overnight Boarding",
+      "description": "Your dog stays with us in our home environment, receiving personalized care, regular exercise, and plenty of love. Daily updates and photos keep you connected while you're away.",
+      "features": [
+        "Home environment, not kennel-style",
+        "Personalized daily routine",
+        "Regular exercise and playtime",
+        "Daily photo and text updates",
+        "Medication administration",
+        "Emergency veterinary coordination"
+      ],
+      "price": "From $80/night",
+      "duration": "24-hour care",
+      "image": "/images/overnight-boarding.jpg"
+    },
+    {
+      "title": "Day Visits & Socialization",
+      "description": "Perfect for busy days or when your dog needs extra exercise and socialization. Drop-off and pickup times that work with your schedule.",
+      "features": [
+        "Flexible drop-off and pickup times",
+        "Structured playtime and exercise",
+        "Socialization with other dogs",
+        "Basic training reinforcement",
+        "Feeding and medication if needed",
+        "Photo updates throughout the day"
+      ],
+      "price": "From $45/day",
+      "duration": "8-10 hours",
+      "image": "/images/day-visits.jpg"
+    },
+    {
+      "title": "Special Needs Care",
+      "description": "Senior dogs, dogs with medical conditions, or those requiring extra attention receive specialized care tailored to their unique requirements.",
+      "features": [
+        "Medication management",
+        "Special diet preparation",
+        "Gentle exercise for senior dogs",
+        "Extra comfort and attention",
+        "Veterinary communication",
+        "Detailed health monitoring"
+      ],
+      "price": "Custom pricing",
+      "duration": "As needed",
+      "image": "/images/special-needs.jpg"
+    }
+  ],
+  "process": {
+    "title": "How It Works",
+    "steps": [
+      {
+        "number": "1",
+        "title": "Book Assessment",
+        "description": "Schedule your complimentary assessment visit to meet us and let your dog get comfortable."
+      },
+      {
+        "number": "2",
+        "title": "Personalized Plan",
+        "description": "We create a detailed care plan based on your dog's personality, needs, and preferences."
+      },
+      {
+        "number": "3",
+        "title": "Booking Made Easy",
+        "description": "Schedule your dog's stay with confidence, knowing they'll receive personalized, loving care."
+      },
+      {
+        "number": "4",
+        "title": "Stay Connected",
+        "description": "Receive daily updates and photos so you can relax knowing your companion is happy and safe."
+      }
+    ]
+  },
+  "guarantee": {
+    "title": "Our Promise to You",
+    "description": "We're so confident in our care that we offer a satisfaction guarantee. If you're not completely satisfied with your dog's experience, we'll work to make it right or provide a full refund.",
+    "features": [
+      "100% satisfaction guarantee",
+      "24/7 emergency support",
+      "Daily communication",
+      "Licensed and insured",
+      "Veterinary partnerships",
+      "Transparent pricing"
+    ]
+  }
+}

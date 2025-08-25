@@ -49,8 +49,15 @@ export async function POST(request: NextRequest) {
                 .from('orders')
                 .insert({
                   stripe_payment_intent_id: session.payment_intent as string,
+                  customer_name: session.customer_details?.name || '',
+                  customer_email: session.customer_details?.email || '',
                   total_amount: orderData.total,
+                  subtotal: orderData.subtotal || orderData.total,
+                  tax_amount: orderData.tax || 0,
+                  shipping_amount: orderData.shipping || 0,
                   status: 'paid',
+                  payment_method: 'stripe',
+                  items: orderData.items || [],
                   shipping_address: orderData.shippingAddress,
                   user_id: null // Anonymous order
                 })
@@ -77,6 +84,25 @@ export async function POST(request: NextRequest) {
 
                 if (itemsError) {
                   console.error('Error creating order items:', itemsError)
+                }
+              }
+
+              // Create order snapshot for data integrity
+              if (order) {
+                try {
+                  // Call the Supabase function to create snapshot
+                  const { error: snapshotError } = await supabase.rpc('create_order_snapshot', {
+                    order_id: order.id
+                  })
+                  
+                  if (snapshotError) {
+                    console.error('Failed to create order snapshot:', snapshotError)
+                  } else {
+                    console.log('Order snapshot created for order:', order.id)
+                  }
+                } catch (snapshotError) {
+                  console.error('Failed to create order snapshot:', snapshotError)
+                  // Don't fail the entire order if snapshot creation fails
                 }
               }
             }

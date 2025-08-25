@@ -1,78 +1,81 @@
-'use client'
+"use client";
 
-import { useEffect, useState, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
-import Navigation from '@/components/navigation'
-import Footer from '@/components/footer'
-import Link from 'next/link'
-import { CheckCircle, Package, Truck, Mail } from 'lucide-react'
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import Navigation from "@/components/navigation";
+import Footer from "@/components/footer";
+import Link from "next/link";
+import { CheckCircle, Package, Truck, Mail } from "lucide-react";
 
 function SuccessContent() {
-  const searchParams = useSearchParams()
-  const sessionId = searchParams.get('session_id')
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get("session_id");
   const [orderData, setOrderData] = useState<{
     payment_status: string;
     amount_total: number;
     customer_email?: string;
-  } | null>(null)
-  const [loading, setLoading] = useState(true)
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchOrderData = async () => {
       try {
-        const response = await fetch(`/api/checkout?session_id=${sessionId}`)
-        const data = await response.json()
-        
+        const response = await fetch(`/api/checkout?session_id=${sessionId}`);
+        const data = await response.json();
+
         if (data.session) {
-          setOrderData(data.session)
+          setOrderData(data.session);
         }
       } catch (error) {
-        console.error('Error fetching order data:', error)
+        console.error("Error fetching order data:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
     if (sessionId) {
-      fetchOrderData()
+      fetchOrderData();
     } else {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [sessionId])
+  }, [sessionId]);
 
   if (loading) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-stone-50">
         <Navigation />
-        <main className="pt-20">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <main className="pt-20 md:pt-24">
+          <div className="max-w-4xl mx-auto px-8 lg:px-12 py-16">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto"></div>
-              <p className="mt-4 text-neutral-600">Processing your order...</p>
+              <p className="mt-4 font-lora text-stone-600">
+                Processing your order...
+              </p>
             </div>
           </div>
         </main>
         <Footer />
       </div>
-    )
+    );
   }
 
   if (!sessionId || !orderData) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-stone-50">
         <Navigation />
-        <main className="pt-20">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <main className="pt-20 md:pt-24">
+          <div className="max-w-4xl mx-auto px-8 lg:px-12 py-16">
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-neutral-900 mb-4">
+              <h1 className="font-crimson text-3xl font-normal text-stone-900 mb-4">
                 Order Not Found
               </h1>
-              <p className="text-neutral-600 mb-8">
-                We couldn&apos;t find your order information. Please contact us if you need assistance.
+              <p className="font-lora text-stone-600 mb-8">
+                We couldn&apos;t find your order information. Please contact us
+                if you need assistance.
               </p>
               <Link
                 href="/shop"
-                className="bg-amber-600 text-white px-6 py-3 rounded-lg hover:bg-amber-700 transition-colors"
+                className="bg-stone-800 text-amber-50 px-8 py-3 font-lora font-medium tracking-wide uppercase hover:bg-stone-700 transition-colors rounded-lg shadow-lg hover:shadow-xl"
               >
                 Continue Shopping
               </Link>
@@ -81,72 +84,86 @@ function SuccessContent() {
         </main>
         <Footer />
       </div>
-    )
+    );
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-stone-50">
       <Navigation />
-      
-      <main className="pt-20">
+
+      <main className="pt-20 md:pt-24">
         {/* Success Header */}
-        <section className="bg-gradient-to-br from-green-50 to-emerald-50 py-16">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div className="bg-green-100 p-4 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-8">
-              <CheckCircle className="h-10 w-10 text-green-600" />
+        <section className="bg-gradient-to-br from-green-50 to-emerald-50 py-24">
+          <div className="max-w-4xl mx-auto px-8 lg:px-12 text-center">
+            <div className="bg-green-100 p-6 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-8">
+              <CheckCircle className="h-12 w-12 text-green-600" />
             </div>
-            
-            <h1 className="font-playfair text-4xl md:text-5xl font-bold text-neutral-900 mb-6">
+
+            <h1 className="font-crimson text-4xl md:text-5xl font-normal text-stone-900 mb-6">
               Order Confirmed!
             </h1>
-            <p className="text-xl text-neutral-600 max-w-2xl mx-auto mb-8">
-              Thank you for your purchase! Your order has been successfully placed and 
-              you&apos;ll receive a confirmation email shortly.
+            <p className="font-lora text-xl text-stone-700 max-w-2xl mx-auto mb-8 leading-relaxed">
+              Thank you for your purchase! Your order has been successfully
+              placed and you&apos;ll receive a confirmation email shortly.
             </p>
-            
+
             {orderData.customer_email && (
-              <div className="bg-white rounded-xl p-6 shadow-lg inline-block">
-                <p className="text-sm text-neutral-600 mb-1">Order confirmation sent to:</p>
-                <p className="font-semibold text-neutral-900">{orderData.customer_email}</p>
+              <div className="bg-white rounded-2xl p-8 shadow-lg inline-block border border-stone-200">
+                <p className="font-lora text-stone-600 mb-2">
+                  Order confirmation sent to:
+                </p>
+                <p className="font-lora font-semibold text-stone-900">
+                  {orderData.customer_email}
+                </p>
               </div>
             )}
           </div>
         </section>
 
         {/* Order Details */}
-        <section className="py-16">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid md:grid-cols-2 gap-8">
+        <section className="py-24 bg-white">
+          <div className="max-w-6xl mx-auto px-8 lg:px-12">
+            <div className="grid md:grid-cols-2 gap-16">
               {/* Order Summary */}
-              <div className="bg-white rounded-xl shadow-lg p-8">
-                <h2 className="font-semibold text-xl mb-6">Order Summary</h2>
-                
+              <div className="bg-stone-50 rounded-2xl p-8">
+                <h2 className="font-crimson text-2xl font-normal text-stone-900 mb-6">
+                  Order Summary
+                </h2>
+
                 <div className="space-y-4 mb-6">
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600">Order ID</span>
-                    <span className="font-mono text-sm">#{sessionId?.slice(-8).toUpperCase()}</span>
+                  <div className="flex justify-between items-center">
+                    <span className="font-lora text-stone-600">Order ID</span>
+                    <span className="font-mono text-stone-900">
+                      #{sessionId?.slice(-8).toUpperCase()}
+                    </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600">Payment Status</span>
-                    <span className="text-green-600 font-medium capitalize">
+                  <div className="flex justify-between items-center">
+                    <span className="font-lora text-stone-600">
+                      Payment Status
+                    </span>
+                    <span className="text-green-600 font-lora font-medium capitalize">
                       {orderData.payment_status}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600">Total Amount</span>
-                    <span className="font-semibold text-lg">
-                      ${(orderData.amount_total / 100).toFixed(2)}
+                  <div className="flex justify-between items-center">
+                    <span className="font-lora text-stone-600">
+                      Total Amount
+                    </span>
+                    <span className="font-lora font-semibold text-lg text-stone-900">
+                      ${orderData.amount_total.toFixed(2)}
                     </span>
                   </div>
                 </div>
 
-                <div className="border-t pt-6">
-                  <h3 className="font-medium mb-4">Payment Method</h3>
-                  <div className="flex items-center space-x-2">
+                <div className="border-t border-stone-200 pt-6">
+                  <h3 className="font-lora font-medium text-stone-900 mb-4">
+                    Payment Method
+                  </h3>
+                  <div className="flex items-center space-x-3">
                     <div className="w-8 h-5 bg-gradient-to-r from-blue-600 to-blue-800 rounded text-white text-xs flex items-center justify-center">
                       CARD
                     </div>
-                    <span className="text-neutral-600 text-sm">
+                    <span className="font-lora text-stone-600 text-sm">
                       Card ending in ****
                     </span>
                   </div>
@@ -154,42 +171,53 @@ function SuccessContent() {
               </div>
 
               {/* What's Next */}
-              <div className="bg-white rounded-xl shadow-lg p-8">
-                <h2 className="font-semibold text-xl mb-6">What&apos;s Next?</h2>
-                
+              <div className="bg-gradient-to-br from-amber-50 to-stone-100 rounded-2xl p-8">
+                <h2 className="font-crimson text-2xl font-normal text-stone-900 mb-6">
+                  What&apos;s Next?
+                </h2>
+
                 <div className="space-y-6">
                   <div className="flex items-start space-x-4">
                     <div className="bg-blue-100 p-3 rounded-full">
                       <Mail className="h-6 w-6 text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="font-medium text-neutral-900">Email Confirmation</h3>
-                      <p className="text-neutral-600 text-sm mt-1">
-                        You&apos;ll receive an order confirmation email within the next few minutes.
+                      <h3 className="font-lora font-medium text-stone-900">
+                        Email Confirmation
+                      </h3>
+                      <p className="font-lora text-stone-600 text-sm mt-1 leading-relaxed">
+                        You&apos;ll receive an order confirmation email within
+                        the next few minutes.
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start space-x-4">
-                    <div className="bg-purple-100 p-3 rounded-full">
-                      <Package className="h-6 w-6 text-purple-600" />
+                    <div className="bg-amber-100 p-3 rounded-full">
+                      <Package className="h-6 w-6 text-amber-700" />
                     </div>
                     <div>
-                      <h3 className="font-medium text-neutral-900">Order Processing</h3>
-                      <p className="text-neutral-600 text-sm mt-1">
-                        We&apos;ll carefully pack your items within 1-2 business days.
+                      <h3 className="font-lora font-medium text-stone-900">
+                        Order Processing
+                      </h3>
+                      <p className="font-lora text-stone-600 text-sm mt-1 leading-relaxed">
+                        We&apos;ll carefully pack your items within 1-2 business
+                        days.
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start space-x-4">
                     <div className="bg-green-100 p-3 rounded-full">
                       <Truck className="h-6 w-6 text-green-600" />
                     </div>
                     <div>
-                      <h3 className="font-medium text-neutral-900">Shipping</h3>
-                      <p className="text-neutral-600 text-sm mt-1">
-                        Your order will be shipped and you&apos;ll receive tracking information.
+                      <h3 className="font-lora font-medium text-stone-900">
+                        Shipping
+                      </h3>
+                      <p className="font-lora text-stone-600 text-sm mt-1 leading-relaxed">
+                        Your order will be shipped and you&apos;ll receive
+                        tracking information.
                       </p>
                     </div>
                   </div>
@@ -198,17 +226,17 @@ function SuccessContent() {
             </div>
 
             {/* Actions */}
-            <div className="mt-12 text-center">
+            <div className="mt-16 text-center">
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/shop"
-                  className="bg-amber-600 text-white px-8 py-3 rounded-lg hover:bg-amber-700 transition-colors"
+                  className="bg-stone-800 text-amber-50 px-8 py-3 font-lora font-medium tracking-wide uppercase hover:bg-stone-700 transition-colors rounded-lg shadow-lg hover:shadow-xl"
                 >
                   Continue Shopping
                 </Link>
                 <Link
                   href="/contact"
-                  className="border border-amber-600 text-amber-600 px-8 py-3 rounded-lg hover:bg-amber-50 transition-colors"
+                  className="border-2 border-stone-800 text-stone-800 px-8 py-3 font-lora font-medium tracking-wide uppercase hover:bg-stone-800 hover:text-amber-50 transition-colors rounded-lg"
                 >
                   Contact Us
                 </Link>
@@ -216,24 +244,35 @@ function SuccessContent() {
             </div>
 
             {/* Additional Information */}
-            <div className="mt-16 bg-amber-50 rounded-xl p-8 border border-amber-200">
-              <h3 className="font-semibold text-neutral-900 mb-4">Need Help?</h3>
-              <div className="grid md:grid-cols-2 gap-6">
+            <div className="mt-16 bg-gradient-to-br from-amber-50 to-stone-100 rounded-2xl p-8 border border-stone-200">
+              <h3 className="font-crimson text-2xl font-normal text-stone-900 mb-6">
+                Need Help?
+              </h3>
+              <div className="grid md:grid-cols-2 gap-8">
                 <div>
-                  <h4 className="font-medium text-neutral-800 mb-2">Questions about your order?</h4>
-                  <p className="text-neutral-600 text-sm mb-2">
-                    Contact us and we&apos;ll be happy to help with any questions or concerns.
+                  <h4 className="font-lora font-medium text-stone-900 mb-3">
+                    Questions about your order?
+                  </h4>
+                  <p className="font-lora text-stone-600 mb-4 leading-relaxed">
+                    Contact us and we&apos;ll be happy to help with any
+                    questions or concerns.
                   </p>
-                  <Link href="/contact" className="text-amber-600 hover:text-amber-700 text-sm font-medium">
+                  <Link
+                    href="/contact"
+                    className="text-amber-700 hover:text-amber-800 font-lora font-medium"
+                  >
                     Get in Touch →
                   </Link>
                 </div>
                 <div>
-                  <h4 className="font-medium text-neutral-800 mb-2">Track your order</h4>
-                  <p className="text-neutral-600 text-sm mb-2">
-                    Once your order ships, you&apos;ll receive tracking information via email.
+                  <h4 className="font-lora font-medium text-stone-900 mb-3">
+                    Track your order
+                  </h4>
+                  <p className="font-lora text-stone-600 mb-4 leading-relaxed">
+                    Once your order ships, you&apos;ll receive tracking
+                    information via email.
                   </p>
-                  <p className="text-amber-600 text-sm font-medium">
+                  <p className="text-amber-700 font-lora font-medium">
                     Tracking info coming soon
                   </p>
                 </div>
@@ -242,23 +281,25 @@ function SuccessContent() {
           </div>
         </section>
       </main>
-      
+
       <Footer />
     </div>
-  )
+  );
 }
 
 export default function SuccessPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
-          <p className="text-neutral-600">Loading...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
+            <p className="text-neutral-600">Loading...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <SuccessContent />
     </Suspense>
-  )
+  );
 }
