@@ -17,6 +17,7 @@ import {
   Check,
 } from "lucide-react";
 import homeData from "@/data/home.json";
+import Image from "next/image";
 
 export default function Page() {
   const [showLanding, setShowLanding] = useState(true);
@@ -221,9 +222,7 @@ export default function Page() {
                 </div>
 
                 <div className="lg:order-first">
-                  <div className="aspect-[4/5] bg-stone-200 rounded-lg overflow-hidden">
-                    {/* Placeholder for image */}
-                  </div>
+                  <div className="aspect-[4/5] bg-stone-200 rounded-lg overflow-hidden"></div>
                 </div>
               </div>
             </div>
