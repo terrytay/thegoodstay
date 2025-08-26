@@ -1,6 +1,6 @@
 {
   "hero": {
-    "title": "Wholesome care for the goodest companions",
+    "title": "Wholesome living made for the goodest lives",
     "subtitle": "Professional dog boarding and pet care services with personalized attention. Your beloved companion deserves nothing but the best.",
     "backgroundImage": "/images/hero-bg.jpg",
     "ctaButtons": [
@@ -41,11 +41,11 @@
   "sections": [
     {
       "title": "Why Choose The Good Stay?",
-      "subtitle": "We understand that your dog isn't just a pet – they're family. That's why we provide the kind of personalized, loving care that gives you peace of mind and keeps your companion happy and healthy.",
+      "subtitle": "I understand that your dog isn't just a pet – they're family. That's why I provide the kind of personalized, loving care that gives you peace of mind and keeps your companion happy and healthy.",
       "features": [
         {
           "title": "Personalized Care Plans",
-          "description": "Every dog is unique. We create customized care plans based on your dog's personality, needs, and preferences.",
+          "description": "Every dog is unique. I create customized care plans based on your dog's personality, needs, and preferences.",
           "icon": "user"
         },
         {
@@ -55,30 +55,30 @@
         },
         {
           "title": "Daily Updates",
-          "description": "Receive photos and updates throughout the day so you always know how your companion is doing.",
+          "description": "Receive photos and updates throughout the day when requested so you always know how your companion is doing.",
           "icon": "camera"
         },
         {
           "title": "Complimentary Assessment",
-          "description": "Every new client starts with a free meet-and-greet to ensure we're the perfect match for your dog.",
+          "description": "Every new client starts with a meet-and-greet to ensure I am the perfect match for your dog.",
           "icon": "check"
         }
       ]
     },
     {
-      "title": "Our Promise to You",
-      "content": "At The Good Stay, we believe every dog deserves to be treated like family. We're not just a boarding service – we're people who genuinely love dogs and understand the trust you place in us when you leave your companion in our care.",
+      "title": "My Promise to You",
+      "content": "At The Good Stay, I believe every dog deserves to be treated like family. I'm not just a boarding service, I'm a person who genuinely love dogs and understand the trust you place in me when you leave your companion in my care.",
       "image": "bio.jpg",
       "testimonials": [
         {
-          "quote": "Max has been staying with The Good Stay for over a year, and it's like dropping him off with family. The daily photos and updates give me such peace of mind.",
-          "author": "Sarah Johnson",
-          "role": "Dog Parent"
+          "quote": "Our beagle, Toby, can be a handful, but Yee Sin handled him like a pro. She didn’t just walk him, she helped reinforce good habits and kept him happy and engaged. The daily photo updates made us feel connected even when we were away.",
+          "author": "Amanda Wong",
+          "role": "Dog Mom to Toby"
         },
         {
-          "quote": "Luna gets so excited when she sees we're heading to The Good Stay. The personalized care and attention she receives is exactly what I was looking for.",
-          "author": "Michael Chen",
-          "role": "Dog Parent"
+          "quote": "Finding someone who truly understands senior dogs is rare, but Yee Sin exceeded every expectation with our golden retriever, Daisy. She managed Daisy’s medication perfectly and gave her so much love and care. We came home to the happiest senior pup ever.",
+          "author": "Daniel & Priya",
+          "role": "Dog Parents to Daisy"
         }
       ]
     }

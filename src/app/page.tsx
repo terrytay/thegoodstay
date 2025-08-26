@@ -70,13 +70,13 @@ export default function Page() {
           {/* Hero Section */}
           <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-stone-100">
             {/* Decorative Elements */}
-            <div className="absolute top-20 left-10 w-32 h-32 border border-stone-300/30 rounded-full opacity-40"></div>
+            {/* <div className="absolute top-20 left-10 w-32 h-32 border border-stone-300/30 rounded-full opacity-40"></div>
             <div className="absolute bottom-32 right-16 w-48 h-48 border border-stone-300/20 rounded-full opacity-30"></div>
             <div className="absolute top-1/3 right-20 w-2 h-2 bg-amber-800/20 rounded-full"></div>
-            <div className="absolute bottom-1/4 left-1/4 w-1 h-1 bg-stone-400/30 rounded-full"></div>
+            <div className="absolute bottom-1/4 left-1/4 w-1 h-1 bg-stone-400/30 rounded-full"></div> */}
             <div className="relative z-20 max-w-4xl mx-auto px-8 lg:px-12 py-32 text-center">
               {/* Stats/Rating */}
-              <div className="mb-12">
+              {/* <div className="mb-12">
                 <div className="flex items-center justify-center space-x-4">
                   <div className="flex items-center space-x-1">
                     {[...Array(5)].map((_, i) => (
@@ -94,10 +94,10 @@ export default function Page() {
                     {homeData.stats.text}
                   </span>
                 </div>
-              </div>
+              </div> */}
 
               {/* Title */}
-              <h1 className="font-crimson text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-normal leading-[0.85] mb-8 md:mb-12 text-stone-900 max-w-5xl mx-auto">
+              <h1 className="font-crimson text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-normal leading-[0.85] mb-8 md:mb-12 text-stone-900 max-w-6xl mx-auto">
                 {homeData.hero.title}
               </h1>
 

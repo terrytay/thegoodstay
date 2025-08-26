@@ -1,36 +1,36 @@
 {
   "hero": {
-    "title": "Our Story",
-    "subtitle": "We believe every dog deserves personalized care, genuine love, and the comfort of a home away from home. Our passion for dogs drives everything we do.",
+    "title": "My Story",
+    "subtitle": "I believe every dog deserves personalized care, genuine love, and the comfort of a home away from home. My love for dogs is what inspires me to give them the best care possible.",
     "backgroundImage": "/images/about-hero.jpg"
   },
   "sections": [
     {
-      "title": "Why We Started",
-      "content": "After years of struggling to find quality care for our own beloved companions, we realized there was a better way. The Good Stay was born from our desire to create the kind of place we'd want to leave our own dogs – where they're not just cared for, but truly loved.",
+      "title": "Why I Started",
+      "content": "I have spent the past 7 years volunteering at Mercylight Animal Rescue and Sanctuary. Especially with Singapore Specials, and I have learnt what it really takes to care for dogs with all kinds of needs, quirks and personalities.",
       "image": "/images/our-story.jpg",
       "layout": "image-right"
     },
     {
-      "title": "Our Philosophy",
-      "content": "Every dog is unique, with their own personality, needs, and preferences. That's why we take the time to understand each companion through our complimentary assessment visit. We don't believe in one-size-fits-all care – we believe in care that's tailored specifically to your dog.",
+      "title": "My Philosophy",
+      "content": "To create a space where every dog feels safe, seen, and loved, just like they are at home",
       "image": "/images/philosophy.jpg",
       "layout": "image-left"
     },
     {
       "title": "Experience You Can Trust",
-      "content": "With over 8 years of experience in pet care and hundreds of happy families, we've learned what it takes to make dogs feel truly at home. Our approach combines professional expertise with genuine love, ensuring your companion receives the best possible care.",
+      "content": "For the past 3 years, I have also been boarding different dogs, making sure each one feels safe, understood and at ease. Follow along as I grow this little dream, for the dogs always!",
       "image": "/images/experience.jpg",
       "layout": "image-right"
     }
   ],
   "stats": [
     {
-      "number": "200+",
+      "number": "100+",
       "label": "Happy Families"
     },
     {
-      "number": "8+",
+      "number": "7+",
       "label": "Years Experience"
     },
     {
@@ -43,8 +43,8 @@
     }
   ],
   "testimonial": {
-    "quote": "The Good Stay isn't just a boarding service – they're family. Max gets so excited when he sees us heading in their direction, and I know he's in the most loving hands possible.",
-    "author": "Sarah Johnson",
-    "role": "Dog Parent to Max"
+    "quote": "We are endlessly grateful to have found Yee Sin. Over the course of 10 to 11 months, she patiently and consistently came by about once a month to get to know our dogs, Truffle and Brie - a pair of very anxious and reactive pups. From day one, Yee Sin approached them with bravery, calmness, and compassion. She always told us, 'Ok, let’s try!'. Where others might shy away, she leaned in gently and earned their trust, slowly but surely. It’s safe to say that Yee Sin is one of the only friends our dogs have. They are completely at ease with her - something we never take for granted. She walks, feeds, cleans, and treats them with endless affection, and always updates us throughout the day with thoughtful messages, videos, or pictures. Her sense of responsibility and genuine care shines through in everything she does. Despite her own busy schedule, Yee Sin made time to help us during a difficult personal period, and we cannot thank her enough for being there - not just for the dogs, but for us too. Her love for Truffle and Brie is clear, and the feeling is mutual. If you have dogs with special needs or complex temperaments (or if you have normal dogs) Yee Sin is the person you want by their side. We wholeheartedly recommend her services to anyone looking for someone who truly understands and loves dogs, and as a dog owner herself, she really understands the owner’s needs too!",
+    "author": "Kerrie",
+    "role": "Dog Mom of Truffle and Brie"
   }
 }

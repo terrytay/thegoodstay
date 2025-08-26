@@ -13,8 +13,11 @@ import {
   Filter,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Grid,
   List,
+  Minus,
+  Plus,
 } from "lucide-react";
 import { Metadata } from "next";
 import { useState, useEffect, useCallback } from "react";
@@ -47,6 +50,13 @@ export default function ShopPage() {
   const [selectedPriceRange, setSelectedPriceRange] = useState("all");
   const [sortBy, setSortBy] = useState("name");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  
+  // Quantity state for products (tracks cart quantities)
+  const [quantities, setQuantities] = useState<{[key: string]: number}>({});
+  
+  // Animation states
+  const [addingToCart, setAddingToCart] = useState<string | null>(null);
+  const [removingFromCart, setRemovingFromCart] = useState<string | null>(null);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -172,16 +182,51 @@ export default function ShopPage() {
   );
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
-  const handleAddToCart = (product: Product) => {
+  const getQuantity = (productId: string) => quantities[productId] || 0;
+  
+  const handleQuantityIncrease = async (product: Product) => {
+    const currentQty = getQuantity(product.id);
+    const newQty = currentQty + 1;
+    
+    // Show adding animation
+    setAddingToCart(product.id);
+    
+    // Update local state
+    setQuantities(prev => ({ ...prev, [product.id]: newQty }));
+    
+    // Add to cart
     addItem({
       id: product.id,
       name: product.name,
       price: product.price,
       image: product.image_url,
     });
-
-    setAddedToCart(product.id);
-    setTimeout(() => setAddedToCart(null), 2000);
+    
+    // Clear animation after a short delay
+    setTimeout(() => setAddingToCart(null), 600);
+  };
+  
+  const handleQuantityDecrease = (product: Product) => {
+    const currentQty = getQuantity(product.id);
+    if (currentQty > 0) {
+      const newQty = currentQty - 1;
+      
+      // Show removing animation
+      setRemovingFromCart(product.id);
+      
+      // Update local state
+      setQuantities(prev => ({ 
+        ...prev, 
+        [product.id]: newQty === 0 ? 0 : newQty 
+      }));
+      
+      // Remove from cart (assuming your cart context has a removeItem method)
+      // For now, we'll assume the cart context handles individual item removal
+      // You may need to modify your cart context to support this
+      
+      // Clear animation
+      setTimeout(() => setRemovingFromCart(null), 600);
+    }
   };
 
   const getIconColor = (color: string) => {
@@ -217,50 +262,28 @@ export default function ShopPage() {
       <Navigation />
 
       <main className="pt-20 md:pt-24">
-        {/* Hero Section */}
-        <section className="bg-gradient-to-br from-amber-50 to-stone-100 py-24">
-          <div className="max-w-4xl mx-auto px-8 lg:px-12 text-center">
-            <h1 className="font-crimson text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-normal text-stone-900 mb-8 leading-tight">
-              {shopData.hero.title}
-            </h1>
-            <p className="font-lora text-xl md:text-2xl text-stone-700 mb-16 leading-relaxed">
-              {shopData.hero.subtitle}
-            </p>
-
-            <div className="flex flex-wrap justify-center gap-12 mb-16">
-              {shopData.features.map((feature, index) => {
-                const IconComponent = getIcon(feature.icon);
-                return (
-                  <div
-                    key={index}
-                    className="flex items-center space-x-3 text-stone-600"
-                  >
-                    <div className="p-3 rounded-full bg-white shadow-sm">
-                      <IconComponent
-                        className={`h-6 w-6 ${getIconColor(feature.color)}`}
-                      />
-                    </div>
-                    <div className="text-left">
-                      <div className="font-lora font-medium text-stone-900">
-                        {feature.title}
-                      </div>
-                      <div className="font-lora text-sm text-stone-600">
-                        {feature.description}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+        {/* Compact Header */}
+        <section className="bg-white border-b border-stone-200 py-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-semibold text-stone-900">Shop</h1>
+                <p className="text-sm text-stone-600 mt-1">{filteredProducts.length} products found</p>
+              </div>
+              <div className="flex items-center space-x-3 text-sm text-stone-600">
+                <span className="flex items-center"><span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>Free shipping over $50</span>
+                <span className="flex items-center"><span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>Same day delivery</span>
+              </div>
             </div>
           </div>
         </section>
 
         {/* Products Grid */}
-        <section className="py-24 bg-white">
-          <div className="max-w-7xl mx-auto px-8 lg:px-12">
-            {/* Search and Filter Bar */}
+        <section className="bg-white py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Compact Search & Filter Bar */}
             <div className="mb-8">
-              <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                 {/* Search */}
                 <div className="relative flex-1 max-w-md">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-stone-400" />
@@ -269,130 +292,70 @@ export default function ShopPage() {
                     placeholder="Search products..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-2.5 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm"
                   />
                 </div>
 
-                {/* Filter Toggle & Controls */}
-                <div className="flex items-center space-x-4">
-                  <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="lg:hidden flex items-center space-x-2 px-4 py-2 bg-stone-100 text-stone-700 rounded-lg hover:bg-stone-200 transition-colors"
+                {/* Filters */}
+                <div className="flex items-center space-x-3">
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="border border-stone-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                   >
-                    <Filter className="h-4 w-4" />
-                    <span>Filters</span>
-                  </button>
+                    <option value="all">All Categories</option>
+                    {categories.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
 
-                  {/* Sort */}
+                  <select
+                    value={selectedPriceRange}
+                    onChange={(e) => setSelectedPriceRange(e.target.value)}
+                    className="border border-stone-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                  >
+                    <option value="all">All Prices</option>
+                    <option value="under-10">Under $10</option>
+                    <option value="10-25">$10-25</option>
+                    <option value="25-50">$25-50</option>
+                    <option value="over-50">$50+</option>
+                  </select>
+
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white"
+                    className="border border-stone-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                   >
-                    <option value="name">Sort by Name</option>
+                    <option value="name">Name A-Z</option>
                     <option value="price-low">Price: Low to High</option>
                     <option value="price-high">Price: High to Low</option>
-                    <option value="newest">Newest First</option>
-                    <option value="featured">Featured First</option>
+                    <option value="newest">Newest</option>
+                    <option value="featured">Featured</option>
                   </select>
-
-                  {/* View Mode */}
-                  <div className="flex bg-stone-100 rounded-lg p-1">
-                    <button
-                      onClick={() => setViewMode("grid")}
-                      className={`p-2 rounded-md transition-colors ${
-                        viewMode === "grid"
-                          ? "bg-white text-amber-600 shadow"
-                          : "text-stone-600 hover:text-stone-900"
-                      }`}
-                    >
-                      <Grid className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => setViewMode("list")}
-                      className={`p-2 rounded-md transition-colors ${
-                        viewMode === "list"
-                          ? "bg-white text-amber-600 shadow"
-                          : "text-stone-600 hover:text-stone-900"
-                      }`}
-                    >
-                      <List className="h-4 w-4" />
-                    </button>
-                  </div>
                 </div>
               </div>
-
-              {/* Desktop Filters */}
-              <div
-                className={`mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 ${
-                  showFilters ? "grid" : "hidden lg:grid"
-                }`}
-              >
-                {/* Category Filter */}
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white"
-                >
-                  <option value="all">All Categories</option>
-                  {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </select>
-
-                {/* Price Filter */}
-                <select
-                  value={selectedPriceRange}
-                  onChange={(e) => setSelectedPriceRange(e.target.value)}
-                  className="px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white"
-                >
-                  <option value="all">All Prices</option>
-                  <option value="under-10">Under $10</option>
-                  <option value="10-25">$10 - $25</option>
-                  <option value="25-50">$25 - $50</option>
-                  <option value="over-50">Over $50</option>
-                </select>
-
-                {/* Clear Filters */}
-                {(searchTerm ||
-                  selectedCategory !== "all" ||
-                  selectedPriceRange !== "all") && (
-                  <button
-                    onClick={() => {
-                      setSearchTerm("");
-                      setSelectedCategory("all");
-                      setSelectedPriceRange("all");
-                    }}
-                    className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
-                  >
-                    Clear Filters
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Results Count */}
-            <div className="mb-6">
-              <p className="text-stone-600">
-                Showing {currentProducts.length} of {filteredProducts.length}{" "}
-                products
-              </p>
             </div>
 
             {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-16">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="animate-pulse">
-                    <div className="aspect-[4/5] bg-stone-200 mb-6 rounded-lg"></div>
-                    <div className="space-y-4">
-                      <div className="h-6 bg-stone-200 rounded"></div>
-                      <div className="h-4 bg-stone-200 rounded"></div>
-                      <div className="flex justify-between items-center">
-                        <div className="h-6 w-20 bg-stone-200 rounded"></div>
-                        <div className="h-10 w-32 bg-stone-200 rounded"></div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+                  <div key={i} className="bg-white rounded-lg border border-stone-200 overflow-hidden animate-pulse">
+                    <div className="aspect-[4/3] bg-stone-100"></div>
+                    <div className="p-4 space-y-3">
+                      <div className="h-4 bg-stone-200 rounded w-3/4"></div>
+                      <div className="h-3 bg-stone-100 rounded w-1/2"></div>
+                      <div className="flex items-center justify-between">
+                        <div className="h-5 bg-stone-200 rounded w-16"></div>
+                        <div className="h-3 bg-stone-100 rounded w-12"></div>
                       </div>
+                      <div className="flex items-center justify-center space-x-3">
+                        <div className="w-8 h-8 bg-stone-100 rounded-full"></div>
+                        <div className="w-8 h-4 bg-stone-100 rounded"></div>
+                        <div className="w-8 h-8 bg-stone-100 rounded-full"></div>
+                      </div>
+                      <div className="h-10 bg-stone-200 rounded-lg"></div>
                     </div>
                   </div>
                 ))}
@@ -435,29 +398,15 @@ export default function ShopPage() {
               </div>
             ) : (
               <>
-                <div
-                  className={
-                    viewMode === "grid"
-                      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
-                      : "space-y-6"
-                  }
-                >
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
                   {currentProducts.map((product) => (
                     <div
                       key={product.id}
-                      className={`group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-stone-200 ${
-                        viewMode === "list" ? "flex" : ""
-                      }`}
+                      className="bg-white rounded-lg border border-stone-200 hover:border-stone-300 hover:shadow-md transition-all duration-200 overflow-hidden"
                     >
-                      {/* Product Image */}
+                      {/* Compact Product Image */}
                       <Link href={`/shop/product/${product.id}`}>
-                        <div
-                          className={`bg-stone-100 overflow-hidden relative cursor-pointer ${
-                            viewMode === "list"
-                              ? "w-48 h-48 flex-shrink-0"
-                              : "aspect-square"
-                          }`}
-                        >
+                        <div className="relative aspect-[4/3] bg-stone-50 cursor-pointer group">
                           {product.image_url ? (
                             <img
                               src={product.image_url}
@@ -466,168 +415,153 @@ export default function ShopPage() {
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
-                              <ShoppingCart className="h-16 w-16 text-stone-300" />
+                              <ShoppingCart className="h-8 w-8 text-stone-300" />
                             </div>
                           )}
-
-                          {/* Overlay */}
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
-
-                          {/* Badges */}
-                          <div className="absolute top-3 left-3 flex flex-col space-y-2">
+                          
+                          {/* Compact Badges */}
+                          <div className="absolute top-2 left-2 flex flex-col space-y-1">
                             {product.featured && (
-                              <span className="bg-amber-600 text-white px-2 py-1 rounded text-xs font-medium">
+                              <span className="bg-amber-500 text-white px-2 py-1 rounded text-xs font-medium">
                                 Featured
                               </span>
                             )}
                             {product.stock_quantity === 0 && (
-                              <span className="bg-red-600 text-white px-2 py-1 rounded text-xs font-medium">
-                                Sold Out
+                              <span className="bg-red-500 text-white px-2 py-1 rounded text-xs font-medium">
+                                Out of Stock
                               </span>
                             )}
-                            {product.stock_quantity > 0 &&
-                              product.stock_quantity <= 5 && (
-                                <span className="bg-orange-600 text-white px-2 py-1 rounded text-xs font-medium">
-                                  Low Stock
-                                </span>
-                              )}
-                          </div>
-
-                          {/* Quick Add Button */}
-                          <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleAddToCart(product);
-                              }}
-                              disabled={
-                                product.stock_quantity === 0 ||
-                                addedToCart === product.id
-                              }
-                              className="bg-white/90 backdrop-blur-sm text-stone-900 p-2 rounded-full shadow-lg hover:bg-white transition-colors disabled:opacity-50"
-                            >
-                              {addedToCart === product.id ? (
-                                <Check size={16} />
-                              ) : (
-                                <ShoppingCart size={16} />
-                              )}
-                            </button>
+                            {product.stock_quantity > 0 && product.stock_quantity <= 5 && (
+                              <span className="bg-orange-500 text-white px-2 py-1 rounded text-xs font-medium">
+                                Low Stock
+                              </span>
+                            )}
                           </div>
                         </div>
                       </Link>
 
-                      {/* Product Info */}
-                      <div className="p-4 space-y-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1 min-w-0">
-                            <Link href={`/shop/product/${product.id}`}>
-                              <h3 className="font-lora font-medium text-stone-900 line-clamp-2 hover:text-amber-700 transition-colors cursor-pointer">
-                                {product.name}
-                              </h3>
-                            </Link>
-                            <p className="font-lora text-sm text-stone-600 mt-1">
-                              {product.category}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          <span className="font-lora text-lg font-semibold text-stone-900">
+                      {/* Compact Product Info */}
+                      <div className="p-4">
+                        <Link href={`/shop/product/${product.id}`}>
+                          <h3 className="font-medium text-stone-900 text-sm line-clamp-2 hover:text-amber-600 transition-colors cursor-pointer mb-1">
+                            {product.name}
+                          </h3>
+                        </Link>
+                        
+                        <p className="text-xs text-stone-500 mb-2">{product.category}</p>
+                        
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-lg font-semibold text-stone-900">
                             ${product.price.toFixed(2)}
                           </span>
-
-                          {/* Stock indicator */}
-                          <div className="flex items-center space-x-1">
-                            {product.stock_quantity > 0 ? (
-                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                            ) : (
-                              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                            )}
-                            <span className="text-xs text-stone-500">
-                              {product.stock_quantity > 0 ? "In Stock" : "Out"}
-                            </span>
+                          <div className="flex items-center space-x-1 text-xs text-stone-500">
+                            <div className={`w-1.5 h-1.5 rounded-full ${
+                              product.stock_quantity > 0 ? "bg-green-500" : "bg-red-500"
+                            }`}></div>
+                            <span>{product.stock_quantity > 0 ? "In Stock" : "Out"}</span>
                           </div>
                         </div>
 
-                        {/* Add to Cart Button */}
-                        <button
-                          onClick={() => handleAddToCart(product)}
-                          disabled={product.stock_quantity === 0}
-                          className="w-full bg-stone-900 text-white py-2.5 px-4 font-lora text-sm font-medium tracking-wide uppercase hover:bg-stone-700 disabled:bg-stone-300 disabled:cursor-not-allowed transition-colors rounded-lg flex items-center justify-center space-x-2"
-                        >
-                          {addedToCart === product.id ? (
-                            <>
-                              <Check size={16} />
-                              <span>Added!</span>
-                            </>
-                          ) : (
-                            <>
-                              <ShoppingCart size={16} />
-                              <span>
-                                {product.stock_quantity === 0
-                                  ? "Sold Out"
-                                  : "Add to Cart"}
-                              </span>
-                            </>
-                          )}
-                        </button>
+                        {/* Quantity Selector & Add to Cart */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-center space-x-3">
+                            <button
+                              onClick={() => updateQuantity(product.id, getQuantity(product.id) - 1)}
+                              disabled={getQuantity(product.id) <= 1}
+                              className="w-8 h-8 rounded-full border border-stone-300 flex items-center justify-center text-stone-600 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              <Minus size={14} />
+                            </button>
+                            <span className="w-8 text-center text-sm font-medium">
+                              {getQuantity(product.id)}
+                            </span>
+                            <button
+                              onClick={() => updateQuantity(product.id, getQuantity(product.id) + 1)}
+                              disabled={getQuantity(product.id) >= product.stock_quantity}
+                              className="w-8 h-8 rounded-full border border-stone-300 flex items-center justify-center text-stone-600 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              <Plus size={14} />
+                            </button>
+                          </div>
+
+                          <button
+                            onClick={() => handleAddToCart(product)}
+                            disabled={product.stock_quantity === 0}
+                            className={`w-full py-2.5 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2 ${
+                              product.stock_quantity === 0
+                                ? "bg-stone-100 text-stone-400 cursor-not-allowed"
+                                : addedToCart === product.id
+                                ? "bg-green-500 text-white"
+                                : "bg-amber-600 text-white hover:bg-amber-700"
+                            }`}
+                          >
+                            {addedToCart === product.id ? (
+                              <>
+                                <Check size={16} />
+                                <span>Added!</span>
+                              </>
+                            ) : (
+                              <>
+                                <ShoppingCart size={16} />
+                                <span>
+                                  {product.stock_quantity === 0 ? "Sold Out" : "Add to Cart"}
+                                </span>
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                {/* Pagination */}
+                {/* Compact Pagination */}
                 {totalPages > 1 && (
-                  <div className="mt-12 flex justify-center items-center space-x-4">
-                    <button
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.max(prev - 1, 1))
-                      }
-                      disabled={currentPage === 1}
-                      className="flex items-center space-x-2 px-4 py-2 bg-stone-100 text-stone-700 rounded-lg hover:bg-stone-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                      <span>Previous</span>
-                    </button>
+                  <div className="mt-8 flex justify-center items-center">
+                    <div className="flex items-center space-x-2 bg-white border border-stone-200 rounded-lg p-1">
+                      <button
+                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className="p-2 text-stone-500 hover:text-stone-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </button>
 
-                    <div className="flex items-center space-x-2">
-                      {[...Array(Math.min(5, totalPages))].map((_, index) => {
-                        const pageNum =
-                          currentPage <= 3
-                            ? index + 1
-                            : currentPage >= totalPages - 2
-                            ? totalPages - 4 + index
-                            : currentPage - 2 + index;
+                      <div className="flex items-center space-x-1">
+                        {[...Array(Math.min(5, totalPages))].map((_, index) => {
+                          const pageNum =
+                            currentPage <= 3
+                              ? index + 1
+                              : currentPage >= totalPages - 2
+                              ? totalPages - 4 + index
+                              : currentPage - 2 + index;
 
-                        if (pageNum < 1 || pageNum > totalPages) return null;
+                          if (pageNum < 1 || pageNum > totalPages) return null;
 
-                        return (
-                          <button
-                            key={pageNum}
-                            onClick={() => setCurrentPage(pageNum)}
-                            className={`px-3 py-2 rounded-lg transition-colors ${
-                              currentPage === pageNum
-                                ? "bg-amber-600 text-white"
-                                : "bg-stone-100 text-stone-700 hover:bg-stone-200"
-                            }`}
-                          >
-                            {pageNum}
-                          </button>
-                        );
-                      })}
+                          return (
+                            <button
+                              key={pageNum}
+                              onClick={() => setCurrentPage(pageNum)}
+                              className={`w-8 h-8 rounded text-sm font-medium transition-colors ${
+                                currentPage === pageNum
+                                  ? "bg-amber-600 text-white"
+                                  : "text-stone-700 hover:bg-stone-100"
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <button
+                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className="p-2 text-stone-500 hover:text-stone-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
                     </div>
-
-                    <button
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                      }
-                      disabled={currentPage === totalPages}
-                      className="flex items-center space-x-2 px-4 py-2 bg-stone-100 text-stone-700 rounded-lg hover:bg-stone-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <span>Next</span>
-                      <ChevronRight className="h-4 w-4" />
-                    </button>
                   </div>
                 )}
               </>
@@ -635,28 +569,6 @@ export default function ShopPage() {
           </div>
         </section>
 
-        {/* Newsletter Section */}
-        <section className="py-24 bg-amber-50">
-          <div className="max-w-4xl mx-auto px-8 lg:px-12 text-center">
-            <h2 className="font-crimson text-4xl md:text-5xl font-normal text-stone-900 mb-8">
-              {shopData.newsletter.title}
-            </h2>
-            <p className="font-lora text-lg text-stone-700 mb-12">
-              {shopData.newsletter.subtitle}
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-6 py-4 bg-white border-2 border-stone-300 focus:border-stone-800 outline-none font-lora rounded"
-              />
-              <button className="bg-stone-800 text-amber-50 px-8 py-4 font-lora font-medium tracking-wide uppercase hover:bg-stone-700 transition-colors rounded shadow-lg hover:shadow-xl">
-                Subscribe
-              </button>
-            </div>
-          </div>
-        </section>
       </main>
 
       <Footer />

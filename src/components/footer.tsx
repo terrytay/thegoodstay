@@ -128,8 +128,8 @@ export default function Footer() {
               Ready to Give Your Dog The Good Stay?
             </h3>
             <p className="text-amber-100 mb-6 max-w-2xl mx-auto">
-              Start with a complimentary assessment visit to see if we&apos;re
-              the perfect match for your furry friend.
+              Start with a complimentary assessment visit to see if I'm the
+              perfect match for your furry friend.
             </p>
             <Link
               href="/book-assessment"

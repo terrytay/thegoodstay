@@ -113,7 +113,7 @@ export default function AboutPage() {
         {/* Testimonial Section */}
         <section className="py-24 bg-white">
           <div className="max-w-4xl mx-auto px-8 lg:px-12 text-center">
-            <blockquote className="font-lora text-2xl md:text-3xl text-stone-700 italic leading-relaxed mb-8">
+            <blockquote className="font-lora  text-stone-700 italic leading-relaxed mb-8">
               "{aboutData.testimonial.quote}"
             </blockquote>
             <cite className="font-lora text-lg text-stone-600 not-italic">
