@@ -111,60 +111,22 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const sessionId = searchParams.get("session_id");
 
+  console.log(`[CHECKOUT GET] Called with session_id: ${sessionId}`);
+
   if (!sessionId) {
     return NextResponse.json({ error: "Session ID required" }, { status: 400 });
   }
 
   try {
     const session = await stripe.checkout.sessions.retrieve(sessionId);
+    console.log(`[CHECKOUT GET] Retrieved session:`, {
+      id: session.id,
+      payment_status: session.payment_status,
+      amount_total: session.amount_total,
+      amount_subtotal: session.amount_subtotal
+    });
 
-    if (session.payment_status === "paid") {
-      // Create order in Supabase using service role for permissions
-      const { createClient } = await import("@supabase/supabase-js");
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-      );
-
-      // Parse order data from metadata
-      const orderData = JSON.parse(session.metadata?.orderData || "{}");
-
-      // Insert order into database
-      const { data: order, error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          stripe_payment_intent_id: session.payment_intent as string,
-          total_amount: orderData.total,
-          status: "paid",
-          shipping_address: orderData.shippingAddress,
-          user_id: null, // Anonymous order
-        })
-        .select()
-        .single();
-
-      if (orderError) {
-        console.error("Error creating order:", orderError);
-      }
-
-      // Insert order items
-      if (order && orderData.items) {
-        const orderItems = orderData.items.map((item: CartItem) => ({
-          order_id: order.id,
-          product_id: item.id,
-          quantity: item.quantity,
-          price: item.price,
-        }));
-
-        const { error: itemsError } = await supabase
-          .from("order_items")
-          .insert(orderItems);
-
-        if (itemsError) {
-          console.error("Error creating order items:", itemsError);
-        }
-      }
-    }
-
+    // Only return session data - order creation is handled by webhook
     return NextResponse.json({
       session,
       orderCreated: session.payment_status === "paid",

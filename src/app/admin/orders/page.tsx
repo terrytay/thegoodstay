@@ -2,16 +2,23 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Eye, MoreHorizontal, Filter, Search, Download } from 'lucide-react'
+import { Eye, MoreHorizontal, Filter, Search, Download, Edit, Trash2 } from 'lucide-react'
+import Link from 'next/link'
 
 interface Order {
   id: string
   total_amount: number
+  subtotal: number | null
+  tax_amount: number | null  
+  shipping_amount: number | null
   status: string
   created_at: string
   customer_name: string | null
   customer_email: string | null
   stripe_session_id: string | null
+  stripe_payment_intent_id: string | null
+  payment_method: string | null
+  items: any[] | null
 }
 
 export default function OrdersPage() {
@@ -82,6 +89,30 @@ export default function OrdersPage() {
     }
   }
 
+  const deleteOrder = async (orderId: string) => {
+    if (!confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
+      return
+    }
+
+    try {
+      const supabase = createClient()
+      const { error } = await supabase
+        .from('orders')
+        .delete()
+        .eq('id', orderId)
+
+      if (error) {
+        console.error('Error deleting order:', error)
+        return
+      }
+
+      // Remove from local state
+      setOrders(prev => prev.filter(order => order.id !== orderId))
+    } catch (err) {
+      console.error('Error:', err)
+    }
+  }
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
@@ -103,12 +134,16 @@ export default function OrdersPage() {
   const exportOrders = async () => {
     try {
       const csv = [
-        ['Order ID', 'Customer Name', 'Email', 'Total Amount', 'Status', 'Date'].join(','),
+        ['Order ID', 'Customer Name', 'Email', 'Total Amount', 'Subtotal', 'Tax', 'Shipping', 'Payment Method', 'Status', 'Date'].join(','),
         ...orders.map(order => [
           order.id,
           order.customer_name || 'Guest',
           order.customer_email || 'N/A',
-          order.total_amount,
+          order.total_amount.toFixed(2),
+          (order.subtotal || 0).toFixed(2),
+          (order.tax_amount || 0).toFixed(2), 
+          (order.shipping_amount || 0).toFixed(2),
+          order.payment_method || 'stripe',
           order.status,
           new Date(order.created_at).toLocaleDateString()
         ].join(','))
@@ -282,11 +317,19 @@ export default function OrdersPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center space-x-2">
-                        <button className="text-amber-600 hover:text-amber-900">
+                        <Link 
+                          href={`/admin/orders/${order.id}`}
+                          className="text-amber-600 hover:text-amber-900 p-1"
+                          title="View Details"
+                        >
                           <Eye className="h-4 w-4" />
-                        </button>
-                        <button className="text-neutral-400 hover:text-neutral-600">
-                          <MoreHorizontal className="h-4 w-4" />
+                        </Link>
+                        <button 
+                          onClick={() => deleteOrder(order.id)}
+                          className="text-red-500 hover:text-red-700 p-1"
+                          title="Delete Order"
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </td>

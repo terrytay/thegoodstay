@@ -44,9 +44,18 @@ CREATE TABLE IF NOT EXISTS orders (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
   total_amount DECIMAL(10,2) NOT NULL,
+  subtotal DECIMAL(10,2),
+  tax_amount DECIMAL(10,2) DEFAULT 0,
+  shipping_amount DECIMAL(10,2) DEFAULT 0,
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled')),
   stripe_payment_intent_id TEXT,
+  stripe_session_id TEXT,
+  customer_name TEXT,
+  customer_email TEXT,
+  payment_method TEXT DEFAULT 'stripe',
+  items JSONB,
   shipping_address JSONB,
+  notes TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );

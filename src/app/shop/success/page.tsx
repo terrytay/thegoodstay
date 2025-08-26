@@ -6,10 +6,12 @@ import Navigation from "@/components/navigation";
 import Footer from "@/components/footer";
 import Link from "next/link";
 import { CheckCircle, Package, Truck, Mail } from "lucide-react";
+import { useCart } from "@/context/cart-context";
 
 function SuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
+  const { clearCart } = useCart();
   const [orderData, setOrderData] = useState<{
     payment_status: string;
     amount_total: number;
@@ -25,6 +27,8 @@ function SuccessContent() {
 
         if (data.session) {
           setOrderData(data.session);
+          // Clear the cart after successful order confirmation
+          clearCart();
         }
       } catch (error) {
         console.error("Error fetching order data:", error);
@@ -150,7 +154,7 @@ function SuccessContent() {
                       Total Amount
                     </span>
                     <span className="font-lora font-semibold text-lg text-stone-900">
-                      ${orderData.amount_total.toFixed(2)}
+                      ${(orderData.amount_total / 100).toFixed(2)}
                     </span>
                   </div>
                 </div>
