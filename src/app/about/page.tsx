@@ -1,4 +1,3 @@
-// @ts-nocheck
 import Navigation from "@/components/navigation";
 import Footer from "@/components/footer";
 import { Metadata } from "next";
