@@ -35,9 +35,9 @@ export async function POST(request: NextRequest) {
       (sum, item) => sum + item.price * item.quantity,
       0
     );
-    const shipping = subtotal > 50 ? 0 : 8.99;
-    const tax = subtotal * 0.08;
-    const total = Math.round((subtotal + shipping + tax) * 100); // Convert to cents
+    const shipping = 0;
+    const tax = 0;
+    const total = Math.round(subtotal + shipping + tax);
 
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
@@ -53,30 +53,30 @@ export async function POST(request: NextRequest) {
           },
           quantity: item.quantity,
         })),
-        ...(shipping > 0
-          ? [
-              {
-                price_data: {
-                  currency: "usd",
-                  product_data: {
-                    name: "Shipping",
-                  },
-                  unit_amount: Math.round(shipping * 100),
-                },
-                quantity: 1,
-              },
-            ]
-          : []),
-        {
-          price_data: {
-            currency: "usd",
-            product_data: {
-              name: "Tax",
-            },
-            unit_amount: Math.round(tax * 100),
-          },
-          quantity: 1,
-        },
+        // ...(shipping > 0
+        //   ? [
+        //       {
+        //         price_data: {
+        //           currency: "usd",
+        //           product_data: {
+        //             name: "Shipping",
+        //           },
+        //           unit_amount: Math.round(shipping * 100),
+        //         },
+        //         quantity: 1,
+        //       },
+        //     ]
+        //   : []),
+        // {
+        //   price_data: {
+        //     currency: "usd",
+        //     product_data: {
+        //       name: "Tax",
+        //     },
+        //     unit_amount: Math.round(tax * 100),
+        //   },
+        //   quantity: 1,
+        // },
       ],
       mode: "payment",
       success_url: `${request.nextUrl.origin}/shop/success?session_id={CHECKOUT_SESSION_ID}`,
