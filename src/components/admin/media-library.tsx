@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import { Search, Grid, List, Trash2, Copy, Check } from 'lucide-react'
 import { getMediaLibrary, deleteImage } from '@/lib/storage'
@@ -33,11 +33,7 @@ const MediaLibrary = ({ onSelectImage, folder, selectionMode = false }: MediaLib
   const [selectedFolder, setSelectedFolder] = useState(folder || 'all')
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchMediaItems()
-  }, [selectedFolder])
-
-  const fetchMediaItems = async () => {
+  const fetchMediaItems = useCallback(async () => {
     try {
       setLoading(true)
       const items = await getMediaLibrary(
@@ -50,7 +46,11 @@ const MediaLibrary = ({ onSelectImage, folder, selectionMode = false }: MediaLib
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedFolder])
+
+  useEffect(() => {
+    fetchMediaItems()
+  }, [fetchMediaItems])
 
   const filteredItems = mediaItems.filter(item =>
     item.original_name.toLowerCase().includes(searchTerm.toLowerCase()) ||

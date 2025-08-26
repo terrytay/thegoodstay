@@ -214,7 +214,7 @@ export default function Page() {
                             className="border-l-4 border-amber-600 pl-6"
                           >
                             <blockquote className="font-lora text-stone-700 italic mb-3">
-                              "{testimonial.quote}"
+                              &ldquo;{testimonial.quote}&rdquo;
                             </blockquote>
                             <cite className="font-lora text-sm text-stone-600 not-italic">
                               — {testimonial.author}, {testimonial.role}

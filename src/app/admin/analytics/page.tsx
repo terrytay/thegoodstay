@@ -11,7 +11,6 @@ import {
   Target,
   Award,
   BarChart3,
-  PieChart,
   Activity,
 } from "lucide-react";
 

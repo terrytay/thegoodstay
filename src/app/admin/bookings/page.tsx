@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Calendar, Dog, Phone, Mail, Search, Filter, Download, MessageSquare } from 'lucide-react'
+import { Calendar, Dog, Phone, Mail, Search, Download, MessageSquare } from 'lucide-react'
 
 interface Booking {
   id: string

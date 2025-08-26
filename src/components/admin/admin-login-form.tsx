@@ -36,7 +36,7 @@ export default function AdminLoginForm() {
         const userRole =
           data.user.user_metadata?.role ||
           data.user.app_metadata?.role ||
-          (data.user as any).raw_user_meta_data?.role;
+          (data.user as { raw_user_meta_data?: { role?: string } }).raw_user_meta_data?.role;
 
         if (userRole !== "admin") {
           await supabase.auth.signOut();

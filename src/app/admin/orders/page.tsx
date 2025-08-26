@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Eye, MoreHorizontal, Filter, Search, Download, Edit, Trash2 } from 'lucide-react'
+import { Eye, Search, Download, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 
 interface Order {
@@ -18,7 +18,13 @@ interface Order {
   stripe_session_id: string | null
   stripe_payment_intent_id: string | null
   payment_method: string | null
-  items: any[] | null
+  items: Array<{
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
+    image?: string;
+  }> | null
 }
 
 export default function OrdersPage() {

@@ -216,7 +216,13 @@ export async function getBookingSnapshot(bookingId: string) {
 // Create service pricing history entry
 export async function createPricingHistory(
   serviceType: string,
-  pricingData: any,
+  pricingData: {
+    basePrice?: number;
+    additionalServices?: Array<{ name: string; price: number }>;
+    discounts?: Array<{ name: string; amount: number }>;
+    taxes?: Array<{ name: string; amount: number }>;
+    total: number;
+  },
   notes?: string
 ) {
   try {

@@ -13,7 +13,7 @@ export async function requireAdmin() {
 
     // Check if user has admin role - use raw_user_meta_data
     const userRole = user.user_metadata?.role || user.app_metadata?.role || 
-                    (user as any).raw_user_meta_data?.role
+                    (user as { raw_user_meta_data?: { role?: string } }).raw_user_meta_data?.role
     
     if (userRole !== 'admin') {
       redirect('/unauthorized')

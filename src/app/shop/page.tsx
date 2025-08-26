@@ -3,28 +3,11 @@
 import Navigation from "@/components/navigation";
 import Footer from "@/components/footer";
 import Link from "next/link";
-import {
-  Star,
-  Heart,
-  Award,
-  ShoppingCart,
-  Check,
-  Search,
-  Filter,
-  ChevronLeft,
-  ChevronRight,
-  ChevronDown,
-  Grid,
-  List,
-  Minus,
-  Plus,
-} from "lucide-react";
-import { Metadata } from "next";
+import { Star, Heart, Award, ShoppingCart, Minus, Plus } from "lucide-react";
 import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useCart } from "@/context/cart-context";
 import { createClient } from "@/lib/supabase/client";
 import { useSearchParams } from "next/navigation";
-import shopData from "@/data/shop.json";
 
 interface Product {
   id: string;
@@ -462,34 +445,6 @@ function ShopPageContent() {
     []
   );
 
-  const getIconColor = (color: string) => {
-    switch (color) {
-      case "amber":
-        return "text-amber-600";
-      case "red":
-        return "text-red-600";
-      case "green":
-        return "text-green-600";
-      case "blue":
-        return "text-blue-600";
-      default:
-        return "text-stone-600";
-    }
-  };
-
-  const getIcon = (iconName: string) => {
-    switch (iconName) {
-      case "star":
-        return Star;
-      case "heart":
-        return Heart;
-      case "award":
-        return Award;
-      default:
-        return Star;
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-stone-50 to-white">
       <Navigation />
@@ -625,12 +580,14 @@ function ShopPageContent() {
             onTouchMove={handleTouchMove}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-            style={{
-              touchAction: "none",
-              overscrollBehavior: "none",
-              WebkitOverscrollBehavior: "none",
-              minHeight: "100vh",
-            } as React.CSSProperties}
+            style={
+              {
+                touchAction: "none",
+                overscrollBehavior: "none",
+                WebkitOverscrollBehavior: "none",
+                minHeight: "100vh",
+              } as React.CSSProperties
+            }
           >
             {loading ? (
               <div className="w-full h-full bg-stone-200 rounded-full animate-pulse" />
@@ -725,7 +682,8 @@ function ShopPageContent() {
                         transformOrigin: "center center",
                         backfaceVisibility: "hidden",
                         willChange: "transform, opacity, filter",
-                        pointerEvents: position.pointerEvents as React.CSSProperties["pointerEvents"],
+                        pointerEvents:
+                          position.pointerEvents as React.CSSProperties["pointerEvents"],
                       }}
                     >
                       <div className="w-[60%] h-[100%] flex items-center justify-center">
@@ -861,14 +819,16 @@ function ShopPageContent() {
 
 export default function ShopPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-stone-50 to-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-amber-200 border-t-amber-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-stone-600">Loading shop...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-br from-amber-50 via-stone-50 to-white flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-amber-200 border-t-amber-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-stone-600">Loading shop...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <ShopPageContent />
     </Suspense>
   );

@@ -61,7 +61,7 @@ export default function DateTimePicker({
         .select("setting_key, setting_value, setting_type");
 
       if (data) {
-        const settings: any = {};
+        const settings: Record<string, string | number> = {};
         data.forEach((setting) => {
           const value =
             setting.setting_type === "number"
@@ -85,7 +85,7 @@ export default function DateTimePicker({
     const startTime = new Date(`2000-01-01T${start}:00`);
     const endTime = new Date(`2000-01-01T${end}:00`);
 
-    let currentTime = new Date(startTime);
+    const currentTime = new Date(startTime);
     while (currentTime <= endTime) {
       const timeString = currentTime.toTimeString().slice(0, 5);
       slots.push(timeString);

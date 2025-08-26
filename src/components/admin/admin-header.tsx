@@ -34,7 +34,13 @@ export default function AdminHeader() {
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
   const [showSearchResults, setShowSearchResults] = useState(false)
-  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [searchResults, setSearchResults] = useState<Array<{
+    id: string;
+    type: 'order' | 'customer' | 'product' | 'booking';
+    title: string;
+    subtitle?: string;
+    href: string;
+  }>>([])
   const [searchLoading, setSearchLoading] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
@@ -258,25 +264,25 @@ export default function AdminHeader() {
 
       const results = [
         ...(orders || []).map(order => ({
-          ...order,
-          type: 'order',
+          id: order.id,
+          type: 'order' as const,
           title: `Order #${order.id}`,
           subtitle: `${order.customer_name || 'Guest'} - $${order.total_amount?.toFixed(2)}`,
-          url: '/admin/orders'
+          href: `/admin/orders/${order.id}`
         })),
         ...(bookings || []).map(booking => ({
-          ...booking,
-          type: 'booking',
+          id: booking.id,
+          type: 'booking' as const,
           title: `Booking - ${booking.dog_name}`,
           subtitle: extractContactInfo(booking.notes).name,
-          url: '/admin/bookings'
+          href: `/admin/bookings`
         })),
         ...(products || []).map(product => ({
-          ...product,
-          type: 'product',
+          id: product.id,
+          type: 'product' as const,
           title: product.name,
           subtitle: `${product.category} - $${product.price} (${product.stock_quantity} in stock)`,
-          url: '/admin/products'
+          href: `/admin/products/${product.id}`
         }))
       ]
 
@@ -295,8 +301,14 @@ export default function AdminHeader() {
     performSearch(value)
   }
 
-  const handleSearchResultClick = (result: any) => {
-    router.push(result.url)
+  const handleSearchResultClick = (result: {
+    id: string;
+    type: 'order' | 'customer' | 'product' | 'booking';
+    title: string;
+    subtitle?: string;
+    href: string;
+  }) => {
+    router.push(result.href)
     setShowSearchResults(false)
     setSearchTerm('')
   }
@@ -397,7 +409,7 @@ export default function AdminHeader() {
                 ) : searchTerm.length >= 2 ? (
                   <div className="p-4 text-center text-neutral-500">
                     <Search className="h-6 w-6 text-neutral-300 mx-auto mb-2" />
-                    <p className="text-sm">No results found for "{searchTerm}"</p>
+                    <p className="text-sm">No results found for &ldquo;{searchTerm}&rdquo;</p>
                   </div>
                 ) : null}
               </div>
@@ -413,7 +425,7 @@ export default function AdminHeader() {
               <ShoppingBag className="h-4 w-4 text-green-600" />
               <div className="text-center">
                 <p className="text-green-700 font-medium">{quickStats.todaysOrders}</p>
-                <p className="text-green-600 text-xs">Today's Orders</p>
+                <p className="text-green-600 text-xs">Today&apos;s Orders</p>
               </div>
             </div>
             
@@ -421,7 +433,7 @@ export default function AdminHeader() {
               <TrendingUp className="h-4 w-4 text-blue-600" />
               <div className="text-center">
                 <p className="text-blue-700 font-medium">${quickStats.todaysRevenue.toFixed(0)}</p>
-                <p className="text-blue-600 text-xs">Today's Revenue</p>
+                <p className="text-blue-600 text-xs">Today&apos;s Revenue</p>
               </div>
             </div>
 

@@ -44,7 +44,7 @@ export function AdminProvider({ children }: AdminProviderProps) {
         const userRole =
           session.user.user_metadata?.role ||
           session.user.app_metadata?.role ||
-          (session.user as any).raw_user_meta_data?.role;
+          (session.user as { raw_user_meta_data?: { role?: string } }).raw_user_meta_data?.role;
 
         setIsAdmin(userRole === "admin");
       } else {
@@ -78,7 +78,7 @@ export function AdminProvider({ children }: AdminProviderProps) {
         const userRole =
           data.user.user_metadata?.role ||
           data.user.app_metadata?.role ||
-          (data.user as any).raw_user_meta_data?.role;
+          (data.user as { raw_user_meta_data?: { role?: string } }).raw_user_meta_data?.role;
 
         if (userRole === "admin") {
           setIsAdmin(true);

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { 
@@ -9,15 +9,13 @@ import {
   User, 
   MapPin, 
   CreditCard, 
-  Calendar,
-  Phone,
   Mail,
-  Edit,
   Trash2,
-  Download,
-  RefreshCw
+  RefreshCw,
+  Edit
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface Order {
   id: string
@@ -31,8 +29,21 @@ interface Order {
   customer_name: string | null
   customer_email: string | null
   payment_method: string
-  items: any[]
-  shipping_address: any
+  items: Array<{
+    id: string;
+    name: string;
+    price: number;
+    quantity: number;
+    image?: string;
+  }>
+  shipping_address: {
+    line1?: string;
+    line2?: string;
+    city?: string;
+    state?: string;
+    postal_code?: string;
+    country?: string;
+  } | null
   notes: string | null
   created_at: string
   updated_at: string
@@ -60,13 +71,7 @@ export default function OrderDetailPage() {
   const [notes, setNotes] = useState('')
   const [editingNotes, setEditingNotes] = useState(false)
 
-  useEffect(() => {
-    if (params.id) {
-      fetchOrder()
-    }
-  }, [params.id])
-
-  const fetchOrder = async () => {
+  const fetchOrder = useCallback(async () => {
     try {
       const supabase = createClient()
       const { data, error } = await supabase
@@ -99,7 +104,13 @@ export default function OrderDetailPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [params.id, router])
+
+  useEffect(() => {
+    if (params.id) {
+      fetchOrder()
+    }
+  }, [params.id, fetchOrder])
 
   const updateOrderStatus = async (newStatus: string) => {
     if (!order) return
@@ -195,7 +206,14 @@ export default function OrderDetailPage() {
     }
   }
 
-  const formatAddress = (address: any) => {
+  const formatAddress = (address: {
+    line1?: string;
+    line2?: string;
+    city?: string;
+    state?: string;
+    postal_code?: string;
+    country?: string;
+  } | null) => {
     if (!address) return 'No address provided'
     
     const parts = []
@@ -247,7 +265,7 @@ export default function OrderDetailPage() {
         <div className="text-center py-12">
           <Package className="h-12 w-12 text-neutral-400 mx-auto mb-4" />
           <h2 className="text-xl font-medium text-neutral-900 mb-2">Order Not Found</h2>
-          <p className="text-neutral-600">The order you're looking for doesn't exist or has been deleted.</p>
+          <p className="text-neutral-600">The order you&apos;re looking for doesn&apos;t exist or has been deleted.</p>
         </div>
       </div>
     )
@@ -313,9 +331,11 @@ export default function OrderDetailPage() {
                     <div key={item.id} className="flex items-center space-x-4 p-4 bg-neutral-50 rounded-lg">
                       <div className="w-16 h-16 bg-neutral-200 rounded-lg overflow-hidden">
                         {item.products?.image_url ? (
-                          <img
+                          <Image
                             src={item.products.image_url}
                             alt={item.products.name || 'Product'}
+                            width={64}
+                            height={64}
                             className="w-full h-full object-cover"
                           />
                         ) : (

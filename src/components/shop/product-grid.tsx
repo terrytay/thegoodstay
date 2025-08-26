@@ -92,10 +92,10 @@ export default function ProductGrid() {
         <div className="bg-white rounded-xl shadow-lg p-12">
           <h2 className="text-2xl font-bold text-neutral-900 mb-4">No Products Available</h2>
           <p className="text-neutral-600 mb-6">
-            We're currently updating our product catalog. Check back soon for premium pet products!
+            We&apos;re currently updating our product catalog. Check back soon for premium pet products!
           </p>
           <p className="text-sm text-neutral-500">
-            Contact us if you're looking for something specific.
+            Contact us if you&apos;re looking for something specific.
           </p>
         </div>
       </div>

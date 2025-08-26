@@ -123,7 +123,7 @@ export default function ProductDetailPage() {
       <div className="p-6">
         <div className="text-center py-16">
           <h2 className="text-xl font-medium text-neutral-900 mb-2">Product Not Found</h2>
-          <p className="text-neutral-600 mb-4">The product you're looking for doesn't exist.</p>
+          <p className="text-neutral-600 mb-4">The product you&apos;re looking for doesn&apos;t exist.</p>
           <Link
             href="/admin/products"
             className="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition-colors"

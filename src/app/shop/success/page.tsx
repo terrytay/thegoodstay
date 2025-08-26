@@ -42,7 +42,7 @@ function SuccessContent() {
     } else {
       setLoading(false);
     }
-  }, [sessionId]);
+  }, [sessionId, clearCart]);
 
   if (loading) {
     return (

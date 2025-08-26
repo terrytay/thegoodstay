@@ -58,9 +58,9 @@ const MediaUpload = ({
       const url = await uploadImage(file, folder)
       onUploadComplete?.(url)
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Upload error:', err)
-      setError(err.message || 'Upload failed')
+      setError(err instanceof Error ? err.message : 'Upload failed')
       setPreview(null)
     } finally {
       setUploading(false)

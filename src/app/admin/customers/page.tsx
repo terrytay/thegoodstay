@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { User, Mail, Phone, Calendar, ShoppingBag, Dog, Search, Filter, Download, MoreHorizontal } from 'lucide-react'
+import { User, Mail, Phone, Calendar, ShoppingBag, Dog, Search, Download, MoreHorizontal } from 'lucide-react'
 
 interface Customer {
   id: string

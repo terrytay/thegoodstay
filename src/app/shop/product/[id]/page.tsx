@@ -39,7 +39,13 @@ export default function ProductDetailPage() {
   const [addedToCart, setAddedToCart] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [selectedTab, setSelectedTab] = useState("description");
-  const [navigationState, setNavigationState] = useState<any>(null);
+  const [navigationState, setNavigationState] = useState<{
+    page: number;
+    search: string;
+    category: string;
+    priceRange: string;
+    sort: string;
+  } | null>(null);
   const { addItem } = useCart();
   
   // Parse navigation state from URL
@@ -162,7 +168,7 @@ export default function ProductDetailPage() {
               Product Not Found
             </h1>
             <p className="font-lora text-stone-600 mb-8">
-              The product you're looking for doesn't exist or is no longer
+              The product you&apos;re looking for doesn&apos;t exist or is no longer
               available.
             </p>
             <Link
