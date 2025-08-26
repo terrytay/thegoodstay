@@ -20,9 +20,10 @@ import {
   Plus,
 } from "lucide-react";
 import { Metadata } from "next";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useCart } from "@/context/cart-context";
 import { createClient } from "@/lib/supabase/client";
+import { useSearchParams } from "next/navigation";
 import shopData from "@/data/shop.json";
 
 interface Product {
@@ -38,11 +39,11 @@ interface Product {
 }
 
 export default function ShopPage() {
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [addedToCart, setAddedToCart] = useState<string | null>(null);
 
   // Search and filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -50,10 +51,10 @@ export default function ShopPage() {
   const [selectedPriceRange, setSelectedPriceRange] = useState("all");
   const [sortBy, setSortBy] = useState("name");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  
+
   // Quantity state for products (tracks cart quantities)
-  const [quantities, setQuantities] = useState<{[key: string]: number}>({});
-  
+  const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
+
   // Animation states
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
   const [removingFromCart, setRemovingFromCart] = useState<string | null>(null);
@@ -66,7 +67,31 @@ export default function ShopPage() {
   const [categories, setCategories] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
 
-  const { addItem } = useCart();
+  // Navigation state for smart back button
+  const [navigationState, setNavigationState] = useState({
+    page: currentPage,
+    search: searchTerm,
+    category: selectedCategory,
+    priceRange: selectedPriceRange,
+    sort: sortBy,
+  });
+
+  // Product showcase states
+  const [currentProductIndex, setCurrentProductIndex] = useState(0);
+  const [lastScrollTime, setLastScrollTime] = useState(0);
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(
+    null
+  );
+  const [isScrollLocked, setIsScrollLocked] = useState(false);
+  const showcaseRef = useRef<HTMLDivElement>(null);
+  const animationFrameRef = useRef<number | null>(null);
+
+  const {
+    addItem,
+    removeItem,
+    updateQuantity: updateCartQuantity,
+    items: cartItems,
+  } = useCart();
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -169,9 +194,52 @@ export default function ShopPage() {
     fetchProducts();
   }, [fetchProducts]);
 
+  // Restore state from URL parameters on page load
+  useEffect(() => {
+    const search = searchParams.get("search") || "";
+    const category = searchParams.get("category") || "all";
+    const priceRange = searchParams.get("priceRange") || "all";
+    const sort = searchParams.get("sort") || "name";
+    const page = parseInt(searchParams.get("page") || "1");
+
+    setSearchTerm(search);
+    setSelectedCategory(category);
+    setSelectedPriceRange(priceRange);
+    setSortBy(sort);
+    setCurrentPage(page);
+  }, [searchParams]);
+
   useEffect(() => {
     filterAndSortProducts();
   }, [filterAndSortProducts]);
+
+  // Update navigation state when filters change
+  useEffect(() => {
+    const newState = {
+      page: currentPage,
+      search: searchTerm,
+      category: selectedCategory,
+      priceRange: selectedPriceRange,
+      sort: sortBy,
+    };
+    setNavigationState(newState);
+    localStorage.setItem("shopNavigationState", JSON.stringify(newState));
+  }, [currentPage, searchTerm, selectedCategory, selectedPriceRange, sortBy]);
+
+  // Function to create smart product link with state
+  const createProductLink = (productId: string) => {
+    const state = encodeURIComponent(JSON.stringify(navigationState));
+    return `/shop/product/${productId}?state=${state}`;
+  };
+
+  // Sync local quantities with actual cart
+  useEffect(() => {
+    const syncedQuantities: { [key: string]: number } = {};
+    cartItems.forEach((item) => {
+      syncedQuantities[item.id] = item.quantity;
+    });
+    setQuantities(syncedQuantities);
+  }, [cartItems]);
 
   // Pagination logic
   const indexOfLastProduct = currentPage * productsPerPage;
@@ -183,51 +251,216 @@ export default function ShopPage() {
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
   const getQuantity = (productId: string) => quantities[productId] || 0;
-  
-  const handleQuantityIncrease = async (product: Product) => {
+
+  const handleQuantityIncrease = (product: Product) => {
+    if (product.stock_quantity === 0) return;
+
     const currentQty = getQuantity(product.id);
-    const newQty = currentQty + 1;
-    
+    if (currentQty >= product.stock_quantity) return;
+
     // Show adding animation
     setAddingToCart(product.id);
-    
-    // Update local state
-    setQuantities(prev => ({ ...prev, [product.id]: newQty }));
-    
-    // Add to cart
+
+    // Add to cart (cart context will handle the quantity increment)
     addItem({
       id: product.id,
       name: product.name,
       price: product.price,
       image: product.image_url,
     });
-    
+
     // Clear animation after a short delay
     setTimeout(() => setAddingToCart(null), 600);
   };
-  
+
   const handleQuantityDecrease = (product: Product) => {
     const currentQty = getQuantity(product.id);
     if (currentQty > 0) {
-      const newQty = currentQty - 1;
-      
       // Show removing animation
       setRemovingFromCart(product.id);
-      
-      // Update local state
-      setQuantities(prev => ({ 
-        ...prev, 
-        [product.id]: newQty === 0 ? 0 : newQty 
-      }));
-      
-      // Remove from cart (assuming your cart context has a removeItem method)
-      // For now, we'll assume the cart context handles individual item removal
-      // You may need to modify your cart context to support this
-      
+
+      // Update cart quantity (this will automatically sync back to local state)
+      const newQty = currentQty - 1;
+      if (newQty === 0) {
+        removeItem(product.id);
+      } else {
+        updateCartQuantity(product.id, newQty);
+      }
+
       // Clear animation
       setTimeout(() => setRemovingFromCart(null), 600);
     }
   };
+
+  // Ultra-smooth ferris wheel scroll handler
+  const handleImageScroll = useCallback(
+    (e: React.WheelEvent) => {
+      // Aggressive scroll prevention
+      e.preventDefault();
+      e.stopPropagation();
+      e.nativeEvent.preventDefault();
+      e.nativeEvent.stopPropagation();
+      e.nativeEvent.stopImmediatePropagation();
+
+      const now = Date.now();
+      if (now - lastScrollTime < 50) return; // Ultra responsive
+
+      // Cancel previous animation frame if still pending
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+
+      // Use requestAnimationFrame for buttery smooth updates
+      animationFrameRef.current = requestAnimationFrame(() => {
+        setLastScrollTime(now);
+
+        if (e.deltaY > 0) {
+          // Scroll down - rotate ferris wheel clockwise (next product to center)
+          setCurrentProductIndex((prev) =>
+            prev < currentProducts.length - 1 ? prev + 1 : 0
+          );
+        } else {
+          // Scroll up - rotate ferris wheel counter-clockwise (previous product to center)
+          setCurrentProductIndex((prev) =>
+            prev > 0 ? prev - 1 : currentProducts.length - 1
+          );
+        }
+      });
+
+      return false;
+    },
+    [currentProducts.length, lastScrollTime]
+  );
+
+  // Mouse enter/leave handlers for scroll locking
+  const handleMouseEnter = useCallback(() => {
+    setIsScrollLocked(true);
+    document.body.style.overflow = "hidden";
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsScrollLocked(false);
+    document.body.style.overflow = "unset";
+  }, []);
+
+  // Enhanced touch events for mobile with stronger prevention
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    setTouchStart({ x: touch.clientX, y: touch.clientY });
+  }, []);
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (!touchStart) return;
+
+      const touch = e.touches[0];
+      const deltaY = touchStart.y - touch.clientY;
+
+      if (Math.abs(deltaY) > 30) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const now = Date.now();
+        if (now - lastScrollTime < 300) return;
+
+        setLastScrollTime(now);
+
+        if (deltaY > 0) {
+          // Swipe up - next product (rotate clockwise)
+          setCurrentProductIndex((prev) =>
+            prev < currentProducts.length - 1 ? prev + 1 : 0
+          );
+        } else {
+          // Swipe down - previous product (rotate counter-clockwise)
+          setCurrentProductIndex((prev) =>
+            prev > 0 ? prev - 1 : currentProducts.length - 1
+          );
+        }
+
+        setTouchStart(null);
+      }
+    },
+    [touchStart, lastScrollTime, currentProducts.length]
+  );
+
+  // Reset product index when products change
+  useEffect(() => {
+    setCurrentProductIndex(0);
+  }, [filteredProducts]);
+
+  // Cleanup animation frames on unmount
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
+
+  // Calculate arc positions following the drawn path
+  const getArcPathPosition = useCallback(
+    (index: number, totalProducts: number, currentIndex: number) => {
+      if (totalProducts === 0) return null;
+
+      const arcRadius = 450;
+      const centerX = -80; // Slightly left of center
+      const centerY = 10;
+
+      // Only show previous, current, and next products
+      if (index === currentIndex) {
+        // Current product: Center-left of the arc (9 o'clock position)
+        const angle = Math.PI; // 180 degrees
+        return {
+          x: centerX + Math.cos(angle) * arcRadius,
+          y: centerY + Math.sin(angle) * arcRadius,
+          scale: 1.2, // Large but not overwhelming
+          opacity: 1,
+          zIndex: 10,
+          rotateZ: 0,
+          blur: 0,
+          pointerEvents: "auto",
+        };
+      }
+
+      // Previous product: Top-right of arc (around 1-2 o'clock position)
+      const prevIndex =
+        currentIndex === 0 ? totalProducts - 1 : currentIndex - 1;
+      if (index === prevIndex) {
+        const angle = (13.2 * Math.PI) / 6; // -30 degrees (1 o'clock)
+        return {
+          x: centerX + Math.cos(angle) * arcRadius,
+          y: centerY + Math.sin(angle) * arcRadius,
+          scale: 0.4,
+          opacity: 0.4,
+          zIndex: 8,
+          rotateZ: -8,
+          blur: 1,
+          pointerEvents: "none",
+        };
+      }
+
+      // Next product: Bottom-right of arc (around 4-5 o'clock position)
+      const nextIndex =
+        currentIndex === totalProducts - 1 ? 0 : currentIndex + 1;
+      if (index === nextIndex) {
+        const angle = (10 * Math.PI) / 6; // -150 degrees (5 o'clock)
+        return {
+          x: centerX + Math.cos(angle) * arcRadius,
+          y: centerY + Math.sin(angle) * arcRadius,
+          scale: 0.4,
+          opacity: 0.4,
+          zIndex: 8,
+          rotateZ: 8,
+          blur: 1,
+          pointerEvents: "none",
+        };
+      }
+
+      // Hide all other products
+      return null;
+    },
+    []
+  );
 
   const getIconColor = (color: string) => {
     switch (color) {
@@ -258,317 +491,368 @@ export default function ShopPage() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-stone-50 to-white">
       <Navigation />
 
       <main className="pt-20 md:pt-24">
-        {/* Compact Header */}
-        <section className="bg-white border-b border-stone-200 py-6">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-semibold text-stone-900">Shop</h1>
-                <p className="text-sm text-stone-600 mt-1">{filteredProducts.length} products found</p>
-              </div>
-              <div className="flex items-center space-x-3 text-sm text-stone-600">
-                <span className="flex items-center"><span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>Free shipping over $50</span>
-                <span className="flex items-center"><span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>Same day delivery</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Products Grid */}
-        <section className="bg-white py-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Compact Search & Filter Bar */}
-            <div className="mb-8">
-              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                {/* Search */}
-                <div className="relative flex-1 max-w-md">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-stone-400" />
-                  <input
-                    type="text"
-                    placeholder="Search products..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm"
-                  />
+        {/* Premium Product Showcase Layout */}
+        <div
+          className="min-h-screen grid grid-cols-12 relative"
+          style={{ minHeight: "100vh" }}
+        >
+          {/* Left Panel - Product Details (Fixed Position) */}
+          <div className="col-span-12 lg:col-span-4 xl:col-span-3 bg-white/80 backdrop-blur-md border-r border-stone-200/50 p-8 lg:p-12 flex flex-col justify-center relative z-10">
+            {currentProducts.length > 0 && (
+              <div className="space-y-8 max-w-md">
+                {/* Brand/Category */}
+                <div className="space-y-2">
+                  <p className="text-xs uppercase tracking-widest text-stone-500 font-medium">
+                    {currentProducts[currentProductIndex]?.category}
+                  </p>
+                  <h1 className="text-3xl lg:text-4xl xl:text-5xl font-light text-stone-900 leading-tight">
+                    {currentProducts[currentProductIndex]?.name}
+                  </h1>
                 </div>
 
-                {/* Filters */}
-                <div className="flex items-center space-x-3">
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="border border-stone-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                  >
-                    <option value="all">All Categories</option>
-                    {categories.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </select>
-
-                  <select
-                    value={selectedPriceRange}
-                    onChange={(e) => setSelectedPriceRange(e.target.value)}
-                    className="border border-stone-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                  >
-                    <option value="all">All Prices</option>
-                    <option value="under-10">Under $10</option>
-                    <option value="10-25">$10-25</option>
-                    <option value="25-50">$25-50</option>
-                    <option value="over-50">$50+</option>
-                  </select>
-
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="border border-stone-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                  >
-                    <option value="name">Name A-Z</option>
-                    <option value="price-low">Price: Low to High</option>
-                    <option value="price-high">Price: High to Low</option>
-                    <option value="newest">Newest</option>
-                    <option value="featured">Featured</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
-                  <div key={i} className="bg-white rounded-lg border border-stone-200 overflow-hidden animate-pulse">
-                    <div className="aspect-[4/3] bg-stone-100"></div>
-                    <div className="p-4 space-y-3">
-                      <div className="h-4 bg-stone-200 rounded w-3/4"></div>
-                      <div className="h-3 bg-stone-100 rounded w-1/2"></div>
-                      <div className="flex items-center justify-between">
-                        <div className="h-5 bg-stone-200 rounded w-16"></div>
-                        <div className="h-3 bg-stone-100 rounded w-12"></div>
-                      </div>
-                      <div className="flex items-center justify-center space-x-3">
-                        <div className="w-8 h-8 bg-stone-100 rounded-full"></div>
-                        <div className="w-8 h-4 bg-stone-100 rounded"></div>
-                        <div className="w-8 h-8 bg-stone-100 rounded-full"></div>
-                      </div>
-                      <div className="h-10 bg-stone-200 rounded-lg"></div>
-                    </div>
+                {/* Price */}
+                <div className="space-y-2">
+                  <div className="text-3xl lg:text-4xl font-light text-stone-900">
+                    ${currentProducts[currentProductIndex]?.price.toFixed(2)}
                   </div>
-                ))}
-              </div>
-            ) : error ? (
-              <div className="text-center py-16">
-                <p className="text-stone-600 font-lora text-lg">{error}</p>
-                <button
-                  onClick={fetchProducts}
-                  className="mt-4 bg-stone-800 text-amber-50 px-6 py-3 font-lora font-medium tracking-wide uppercase hover:bg-stone-700 transition-colors rounded shadow-lg hover:shadow-xl"
-                >
-                  Try Again
-                </button>
-              </div>
-            ) : filteredProducts.length === 0 ? (
-              <div className="text-center py-16">
-                {searchTerm ||
-                selectedCategory !== "all" ||
-                selectedPriceRange !== "all" ? (
-                  <div>
-                    <p className="text-stone-600 font-lora text-lg mb-4">
-                      No products match your search criteria.
-                    </p>
-                    <button
-                      onClick={() => {
-                        setSearchTerm("");
-                        setSelectedCategory("all");
-                        setSelectedPriceRange("all");
-                      }}
-                      className="bg-amber-600 text-white px-6 py-3 font-lora font-medium tracking-wide uppercase hover:bg-amber-700 transition-colors rounded-lg shadow-lg hover:shadow-xl"
-                    >
-                      Clear All Filters
-                    </button>
+                  {currentProducts[currentProductIndex]?.stock_quantity <= 5 &&
+                    currentProducts[currentProductIndex]?.stock_quantity >
+                      0 && (
+                      <p className="text-sm text-amber-600 font-medium">
+                        Only{" "}
+                        {currentProducts[currentProductIndex]?.stock_quantity}{" "}
+                        left
+                      </p>
+                    )}
+                </div>
+
+                {/* Description */}
+                <p className="text-stone-600 leading-relaxed">
+                  {currentProducts[currentProductIndex]?.description ||
+                    "Premium quality product crafted with attention to detail and designed for the modern lifestyle."}
+                </p>
+
+                {/* Smart Quantity Controls */}
+                {currentProducts[currentProductIndex]?.stock_quantity === 0 ? (
+                  <div className="py-4 px-6 bg-stone-100 text-stone-400 text-center rounded-lg">
+                    Out of Stock
                   </div>
                 ) : (
-                  <p className="text-stone-600 font-lora text-lg">
-                    No products available at the moment.
-                  </p>
-                )}
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-                  {currentProducts.map((product) => (
-                    <div
-                      key={product.id}
-                      className="bg-white rounded-lg border border-stone-200 hover:border-stone-300 hover:shadow-md transition-all duration-200 overflow-hidden"
-                    >
-                      {/* Compact Product Image */}
-                      <Link href={`/shop/product/${product.id}`}>
-                        <div className="relative aspect-[4/3] bg-stone-50 cursor-pointer group">
-                          {product.image_url ? (
-                            <img
-                              src={product.image_url}
-                              alt={product.name}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <ShoppingCart className="h-8 w-8 text-stone-300" />
-                            </div>
-                          )}
-                          
-                          {/* Compact Badges */}
-                          <div className="absolute top-2 left-2 flex flex-col space-y-1">
-                            {product.featured && (
-                              <span className="bg-amber-500 text-white px-2 py-1 rounded text-xs font-medium">
-                                Featured
-                              </span>
-                            )}
-                            {product.stock_quantity === 0 && (
-                              <span className="bg-red-500 text-white px-2 py-1 rounded text-xs font-medium">
-                                Out of Stock
-                              </span>
-                            )}
-                            {product.stock_quantity > 0 && product.stock_quantity <= 5 && (
-                              <span className="bg-orange-500 text-white px-2 py-1 rounded text-xs font-medium">
-                                Low Stock
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </Link>
+                  <div className="flex items-center space-x-6">
+                    <div className="flex items-center space-x-4">
+                      {getQuantity(currentProducts[currentProductIndex]?.id) >
+                        0 && (
+                        <button
+                          onClick={() =>
+                            handleQuantityDecrease(
+                              currentProducts[currentProductIndex]
+                            )
+                          }
+                          className="w-12 h-12 rounded-full border-2 border-stone-300 flex items-center justify-center text-stone-600 hover:border-red-400 hover:text-red-600 transition-all duration-200"
+                        >
+                          <Minus size={20} />
+                        </button>
+                      )}
 
-                      {/* Compact Product Info */}
-                      <div className="p-4">
-                        <Link href={`/shop/product/${product.id}`}>
-                          <h3 className="font-medium text-stone-900 text-sm line-clamp-2 hover:text-amber-600 transition-colors cursor-pointer mb-1">
-                            {product.name}
-                          </h3>
-                        </Link>
-                        
-                        <p className="text-xs text-stone-500 mb-2">{product.category}</p>
-                        
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="text-lg font-semibold text-stone-900">
-                            ${product.price.toFixed(2)}
+                      {getQuantity(currentProducts[currentProductIndex]?.id) >
+                      0 ? (
+                        <div className="flex flex-col items-center min-w-[60px]">
+                          <span className="text-2xl font-light text-stone-900">
+                            {getQuantity(
+                              currentProducts[currentProductIndex]?.id
+                            )}
                           </span>
-                          <div className="flex items-center space-x-1 text-xs text-stone-500">
-                            <div className={`w-1.5 h-1.5 rounded-full ${
-                              product.stock_quantity > 0 ? "bg-green-500" : "bg-red-500"
-                            }`}></div>
-                            <span>{product.stock_quantity > 0 ? "In Stock" : "Out"}</span>
-                          </div>
+                          <span className="text-xs text-green-600 font-medium uppercase tracking-wide">
+                            in cart
+                          </span>
                         </div>
-
-                        {/* Quantity Selector & Add to Cart */}
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-center space-x-3">
-                            <button
-                              onClick={() => updateQuantity(product.id, getQuantity(product.id) - 1)}
-                              disabled={getQuantity(product.id) <= 1}
-                              className="w-8 h-8 rounded-full border border-stone-300 flex items-center justify-center text-stone-600 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <Minus size={14} />
-                            </button>
-                            <span className="w-8 text-center text-sm font-medium">
-                              {getQuantity(product.id)}
-                            </span>
-                            <button
-                              onClick={() => updateQuantity(product.id, getQuantity(product.id) + 1)}
-                              disabled={getQuantity(product.id) >= product.stock_quantity}
-                              className="w-8 h-8 rounded-full border border-stone-300 flex items-center justify-center text-stone-600 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <Plus size={14} />
-                            </button>
-                          </div>
-
-                          <button
-                            onClick={() => handleAddToCart(product)}
-                            disabled={product.stock_quantity === 0}
-                            className={`w-full py-2.5 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center space-x-2 ${
-                              product.stock_quantity === 0
-                                ? "bg-stone-100 text-stone-400 cursor-not-allowed"
-                                : addedToCart === product.id
-                                ? "bg-green-500 text-white"
-                                : "bg-amber-600 text-white hover:bg-amber-700"
-                            }`}
-                          >
-                            {addedToCart === product.id ? (
-                              <>
-                                <Check size={16} />
-                                <span>Added!</span>
-                              </>
-                            ) : (
-                              <>
-                                <ShoppingCart size={16} />
-                                <span>
-                                  {product.stock_quantity === 0 ? "Sold Out" : "Add to Cart"}
-                                </span>
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Compact Pagination */}
-                {totalPages > 1 && (
-                  <div className="mt-8 flex justify-center items-center">
-                    <div className="flex items-center space-x-2 bg-white border border-stone-200 rounded-lg p-1">
-                      <button
-                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                        disabled={currentPage === 1}
-                        className="p-2 text-stone-500 hover:text-stone-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                      </button>
-
-                      <div className="flex items-center space-x-1">
-                        {[...Array(Math.min(5, totalPages))].map((_, index) => {
-                          const pageNum =
-                            currentPage <= 3
-                              ? index + 1
-                              : currentPage >= totalPages - 2
-                              ? totalPages - 4 + index
-                              : currentPage - 2 + index;
-
-                          if (pageNum < 1 || pageNum > totalPages) return null;
-
-                          return (
-                            <button
-                              key={pageNum}
-                              onClick={() => setCurrentPage(pageNum)}
-                              className={`w-8 h-8 rounded text-sm font-medium transition-colors ${
-                                currentPage === pageNum
-                                  ? "bg-amber-600 text-white"
-                                  : "text-stone-700 hover:bg-stone-100"
-                              }`}
-                            >
-                              {pageNum}
-                            </button>
-                          );
-                        })}
-                      </div>
+                      ) : (
+                        <span className="text-sm text-stone-500 font-medium px-4 min-w-[60px] text-center">
+                          Qty
+                        </span>
+                      )}
 
                       <button
-                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                        disabled={currentPage === totalPages}
-                        className="p-2 text-stone-500 hover:text-stone-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() =>
+                          handleQuantityIncrease(
+                            currentProducts[currentProductIndex]
+                          )
+                        }
+                        disabled={
+                          getQuantity(
+                            currentProducts[currentProductIndex]?.id
+                          ) >=
+                          currentProducts[currentProductIndex]?.stock_quantity
+                        }
+                        className="w-12 h-12 rounded-full border-2 border-amber-400 flex items-center justify-center text-amber-600 hover:bg-amber-50 hover:border-amber-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <ChevronRight className="h-4 w-4" />
+                        <Plus size={20} />
                       </button>
                     </div>
+
+                    {/* Add to Bag Button */}
+                    <button
+                      onClick={() =>
+                        handleQuantityIncrease(
+                          currentProducts[currentProductIndex]
+                        )
+                      }
+                      disabled={
+                        currentProducts[currentProductIndex]?.stock_quantity ===
+                        0
+                      }
+                      className="flex-1 bg-stone-900 text-white py-4 px-8 rounded-lg hover:bg-stone-800 transition-colors disabled:bg-stone-300 disabled:cursor-not-allowed font-medium tracking-wide uppercase text-sm"
+                    >
+                      Add to Bag
+                    </button>
                   </div>
                 )}
-              </>
+              </div>
             )}
           </div>
-        </section>
 
+          {/* Center Stage - Clock-Face Product Layout */}
+          <div
+            ref={showcaseRef}
+            className="col-span-12 lg:col-span-6 xl:col-span-7 relative flex items-stretch justify-items-stretch overflow-hidden product-showcase-arc"
+            onWheelCapture={handleImageScroll}
+            onWheel={handleImageScroll}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            style={{
+              touchAction: "none",
+              overscrollBehavior: "none",
+              // @ts-ignore
+              WebkitOverscrollBehavior: "none",
+              minHeight: "100vh",
+            }}
+          >
+            {loading ? (
+              <div className="w-full h-full bg-stone-200 rounded-full animate-pulse" />
+            ) : currentProducts.length > 0 ? (
+              <div className="relative w-full h-full flex items-center justify-center perspective-1000">
+                {/* Light Gray Arc Background Guide */}
+                <div className="absolute inset-0 pointer-events-none z-0">
+                  <svg width="100%" height="100%" viewBox="30 0 50 300">
+                    <path
+                      d="M150 -1 A100 100 0 0 0 150 250"
+                      stroke="#F0F0F0"
+                      strokeWidth="1"
+                      opacity="0.5"
+                      fill="none"
+                    />
+                  </svg>
+                </div>
+
+                {/* Product Counter - Right Side Vertical */}
+                <div className="absolute right-8 top-1/2 transform -translate-y-1/2 z-20">
+                  <div className="flex flex-col items-center space-y-6">
+                    {/* Scroll Hint */}
+                    <div className="text-center">
+                      <div className="text-xs text-stone-400 mb-2">scroll</div>
+                      <div className="flex flex-col items-center space-y-1">
+                        <div className="w-0.5 h-6 bg-stone-300"></div>
+                        <div className="w-1 h-1 bg-stone-400 rounded-full"></div>
+                        <div className="w-0.5 h-6 bg-stone-300"></div>
+                      </div>
+                    </div>
+
+                    {/* Product Counter */}
+                    <div className="text-center">
+                      <span className="text-xs text-stone-500 font-medium">
+                        {String(currentProductIndex + 1).padStart(2, "0")} /{" "}
+                        {String(currentProducts.length).padStart(2, "0")}
+                      </span>
+                    </div>
+
+                    {/* Vertical Dots */}
+                    <div className="flex flex-col space-y-2">
+                      {currentProducts.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setCurrentProductIndex(index)}
+                          className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                            index === currentProductIndex
+                              ? "bg-stone-900 scale-125 shadow-sm"
+                              : "bg-stone-300 hover:bg-stone-400 hover:scale-110"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Arc Path Product Display */}
+                {currentProducts.map((product, index) => {
+                  const position = getArcPathPosition(
+                    index,
+                    currentProducts.length,
+                    currentProductIndex
+                  );
+
+                  // Only render visible products (previous, current, next)
+                  if (!position) return null;
+
+                  return (
+                    <div
+                      key={product.id}
+                      className={`absolute transition-all duration-700 ease-out transform-gpu product-card-3d ${
+                        index === currentProductIndex
+                          ? "arc-center-active cursor-pointer"
+                          : "cursor-default"
+                      }`}
+                      onClick={
+                        index === currentProductIndex
+                          ? undefined
+                          : () => setCurrentProductIndex(index)
+                      }
+                      style={{
+                        transform: `
+                          translate3d(${position.x}px, ${position.y}px, 0) 
+                          scale(${position.scale}) 
+                          rotateZ(${position.rotateZ}deg)
+                        `,
+                        opacity: position.opacity,
+                        zIndex: position.zIndex,
+                        filter: `blur(${position.blur}px) drop-shadow(0 ${
+                          10 * position.scale
+                        }px ${20 * position.scale}px rgba(0,0,0,0.15))`,
+                        transformOrigin: "center center",
+                        backfaceVisibility: "hidden",
+                        willChange: "transform, opacity, filter",
+                        pointerEvents: position.pointerEvents,
+                      }}
+                    >
+                      <div className="w-[60%] h-[100%] flex items-center justify-center">
+                        {product.image_url ? (
+                          <img
+                            src={product.image_url}
+                            alt={product.name}
+                            className="max-w-full max-h-full object-contain"
+                            style={{
+                              transformStyle: "preserve-3d",
+                            }}
+                          />
+                        ) : (
+                          <div className="w-64 h-64 flex items-center justify-center">
+                            <ShoppingCart className="w-32 h-32 text-stone-300 opacity-50" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Featured Badge */}
+                      {product.featured && (
+                        <div className="absolute -top-4 -right-4 bg-amber-500 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
+                          Featured
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center text-stone-500">
+                <ShoppingCart className="w-24 h-24 mx-auto mb-4 opacity-30" />
+                <p>No products available</p>
+              </div>
+            )}
+          </div>
+
+          {/* Right Panel - Categories (Fixed Position) */}
+          <div className="col-span-12 lg:col-span-2 bg-white/80 backdrop-blur-md border-l border-stone-200/50 p-6 lg:p-8 flex flex-col justify-center relative z-10">
+            <div className="space-y-6">
+              <h3 className="text-sm uppercase tracking-widest text-stone-500 font-medium">
+                Categories
+              </h3>
+
+              <div className="space-y-4">
+                <button
+                  onClick={() => setSelectedCategory("all")}
+                  className={`block text-left transition-colors duration-200 ${
+                    selectedCategory === "all"
+                      ? "text-stone-900 font-medium"
+                      : "text-stone-600 hover:text-stone-900"
+                  }`}
+                >
+                  All Products
+                </button>
+
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    className={`block text-left transition-colors duration-200 ${
+                      selectedCategory === category
+                        ? "text-stone-900 font-medium"
+                        : "text-stone-600 hover:text-stone-900"
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+
+              {/* View All Link */}
+              <div className="pt-6 border-t border-stone-200">
+                <Link
+                  href="/shop/cart"
+                  className="text-xs uppercase tracking-wide text-amber-600 hover:text-amber-700 font-medium"
+                >
+                  View Cart →
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Additional Content to Test Page Scrolling */}
+        <section className="py-24 bg-white">
+          <div className="max-w-4xl mx-auto px-8 lg:px-12 text-center">
+            <h2 className="text-3xl lg:text-4xl font-light text-stone-900 mb-8">
+              Why Choose Our Products?
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="space-y-4">
+                <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto">
+                  <Star className="w-8 h-8 text-amber-600" />
+                </div>
+                <h3 className="text-lg font-medium text-stone-900">
+                  Premium Quality
+                </h3>
+                <p className="text-stone-600 text-sm">
+                  Every product is carefully selected and tested for quality and
+                  durability.
+                </p>
+              </div>
+              <div className="space-y-4">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                  <Heart className="w-8 h-8 text-green-600" />
+                </div>
+                <h3 className="text-lg font-medium text-stone-900">Pet Safe</h3>
+                <p className="text-stone-600 text-sm">
+                  All materials are non-toxic and safe for your beloved pets.
+                </p>
+              </div>
+              <div className="space-y-4">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+                  <ShoppingCart className="w-8 h-8 text-blue-600" />
+                </div>
+                <h3 className="text-lg font-medium text-stone-900">
+                  Easy Shopping
+                </h3>
+                <p className="text-stone-600 text-sm">
+                  Simple, secure checkout with fast delivery to your door.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
 
       <Footer />

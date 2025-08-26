@@ -44,3 +44,239 @@ html {
 ::-webkit-scrollbar-thumb:hover {
   background: #b45309;
 }
+
+/* Premium product showcase styles */
+.bg-gradient-radial {
+  background: radial-gradient(
+    circle at center,
+    var(--tw-gradient-from),
+    var(--tw-gradient-to)
+  );
+}
+
+/* Product carousel animations - Vertical */
+@keyframes productSlideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(150px) scale(0.9) rotateX(20deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotateX(0deg);
+  }
+}
+
+@keyframes productSlideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-150px) scale(0.9) rotateX(-20deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotateX(0deg);
+  }
+}
+
+@keyframes productSlideOutUp {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotateX(0deg);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-150px) scale(0.9) rotateX(-20deg);
+  }
+}
+
+@keyframes productSlideOutDown {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotateX(0deg);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(150px) scale(0.9) rotateX(20deg);
+  }
+}
+
+.product-enter-up {
+  animation: productSlideInUp 0.7s ease-out forwards;
+}
+
+.product-enter-down {
+  animation: productSlideInDown 0.7s ease-out forwards;
+}
+
+.product-exit-up {
+  animation: productSlideOutUp 0.7s ease-out forwards;
+}
+
+.product-exit-down {
+  animation: productSlideOutDown 0.7s ease-out forwards;
+}
+
+/* Smooth transitions for product showcase */
+.product-showcase {
+  perspective: 1000px;
+}
+
+.product-card-3d {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+/* Enhanced Product showcase with stronger scroll prevention */
+.product-showcase-arc {
+  overscroll-behavior: none !important;
+  -webkit-overscroll-behavior: none !important;
+  -ms-overscroll-behavior: none !important;
+  scroll-behavior: auto !important;
+  touch-action: none !important;
+  -webkit-touch-action: none !important;
+  -ms-touch-action: none !important;
+  overflow: hidden;
+  cursor: grab;
+}
+
+.product-showcase-arc:active {
+  cursor: grabbing;
+}
+
+/* 3D perspective container */
+.perspective-1000 {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+/* Enhanced 3D product cards */
+.product-card-3d {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  -moz-backface-visibility: hidden;
+}
+
+/* Smooth hardware-accelerated transitions */
+.transform-gpu {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: transform, opacity, filter;
+}
+
+/* Prevent text selection during carousel interaction */
+.product-showcase-arc * {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Arc rotation animations */
+@keyframes arcRotateIn {
+  from {
+    transform: scale(0.5) rotateY(90deg) translateZ(-200px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) rotateY(0deg) translateZ(0);
+    opacity: 1;
+  }
+}
+
+@keyframes arcRotateOut {
+  from {
+    transform: scale(1) rotateY(0deg) translateZ(0);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.5) rotateY(-90deg) translateZ(-200px);
+    opacity: 0;
+  }
+}
+
+/* Floating animation for active product */
+@keyframes floatCenter {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Arc product enter/exit classes */
+.arc-enter {
+  animation: arcRotateIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.arc-exit {
+  animation: arcRotateOut 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Active product floating effect */
+.arc-center-active {
+  animation: floatCenter 4s ease-in-out infinite;
+}
+
+/* Enhanced hover effects for arc products */
+.product-showcase-arc .product-card-3d:hover {
+  /* transform: scale(1.05) !important; */
+  filter: brightness(1.1) !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}
+
+/* Synchronized smooth arc transitions - all 3 images move together */
+.product-showcase-arc .product-card-3d {
+  transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1),
+    opacity 0.6s cubic-bezier(0.25, 0.8, 0.25, 1),
+    filter 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transform-style: preserve-3d;
+  /* Synchronized timing for no overlap/lag */
+  transition-delay: 0s;
+}
+
+/* 4-Strip arc showcase with perfect centering */
+.product-showcase-arc {
+  height: 100vh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Smooth floating animation for center product only */
+.arc-center-active {
+  animation: gentleFloat 6s ease-in-out infinite;
+}
+
+@keyframes gentleFloat {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Remove ALL hover effects from non-active products */
+.product-showcase-arc .product-card-3d {
+  pointer-events: var(--pointer-events, auto);
+}
+
+/* Only allow hover on center (active) product */
+.product-showcase-arc .arc-center-active:hover {
+  /* transform: scale(1.25) !important; */
+  filter: brightness(1.03) !important;
+}
+
+/* Disable hover on non-active products */
+.product-showcase-arc {
+  pointer-events: none !important;
+}
+
+.product-showcase-arc .product-card-3d:not(.arc-center-active):hover {
+  transform: none !important;
+  filter: none !important;
+}

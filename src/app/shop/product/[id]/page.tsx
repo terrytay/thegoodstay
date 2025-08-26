@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Navigation from "@/components/navigation";
 import Footer from "@/components/footer";
@@ -33,12 +33,45 @@ interface Product {
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [addedToCart, setAddedToCart] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [selectedTab, setSelectedTab] = useState("description");
+  const [navigationState, setNavigationState] = useState<any>(null);
   const { addItem } = useCart();
+  
+  // Parse navigation state from URL
+  useEffect(() => {
+    const stateParam = searchParams.get('state');
+    if (stateParam) {
+      try {
+        const parsedState = JSON.parse(decodeURIComponent(stateParam));
+        setNavigationState(parsedState);
+      } catch (e) {
+        console.error('Error parsing navigation state:', e);
+      }
+    }
+  }, [searchParams]);
+  
+  // Smart back navigation function
+  const handleBackToShop = () => {
+    if (navigationState) {
+      // Build the URL with the saved state
+      const params = new URLSearchParams();
+      if (navigationState.search) params.set('search', navigationState.search);
+      if (navigationState.category && navigationState.category !== 'all') params.set('category', navigationState.category);
+      if (navigationState.priceRange && navigationState.priceRange !== 'all') params.set('priceRange', navigationState.priceRange);
+      if (navigationState.sort && navigationState.sort !== 'name') params.set('sort', navigationState.sort);
+      if (navigationState.page && navigationState.page !== 1) params.set('page', navigationState.page.toString());
+      
+      const queryString = params.toString();
+      router.push(`/shop${queryString ? `?${queryString}` : ''}`);
+    } else {
+      router.push('/shop');
+    }
+  };
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -150,19 +183,27 @@ export default function ProductDetailPage() {
       <Navigation />
 
       <main className="pt-20 md:pt-24">
-        {/* Breadcrumb */}
-        <section className="py-8 bg-white border-b border-stone-200">
-          <div className="max-w-7xl mx-auto px-8 lg:px-12">
-            <div className="flex items-center space-x-2 font-lora text-sm text-stone-600">
-              <Link href="/" className="hover:text-stone-900">
-                Home
-              </Link>
-              <span>/</span>
-              <Link href="/shop" className="hover:text-stone-900">
-                Shop
-              </Link>
-              <span>/</span>
-              <span className="text-stone-900">{product.name}</span>
+        {/* Smart Back Navigation */}
+        <section className="py-4 bg-white border-b border-stone-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={handleBackToShop}
+                className="flex items-center space-x-2 text-stone-600 hover:text-stone-900 transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="text-sm font-medium">
+                  {navigationState ? 'Back to results' : 'Back to Shop'}
+                </span>
+              </button>
+              
+              <div className="flex items-center space-x-2 text-xs text-stone-500">
+                <Link href="/" className="hover:text-stone-700">Home</Link>
+                <span>/</span>
+                <button onClick={handleBackToShop} className="hover:text-stone-700">Shop</button>
+                <span>/</span>
+                <span className="text-stone-700 font-medium">{product.name}</span>
+              </div>
             </div>
           </div>
         </section>
