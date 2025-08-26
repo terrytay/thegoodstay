@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createClient } from "@/lib/supabase/client";
 
 // Create comprehensive order snapshot

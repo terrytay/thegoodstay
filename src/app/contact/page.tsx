@@ -1,4 +1,3 @@
-// @ts-nocheck
 import Navigation from "@/components/navigation";
 import Footer from "@/components/footer";
 import { Metadata } from "next";
@@ -102,29 +101,33 @@ export default function ContactPage() {
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block font-lora text-sm font-medium text-stone-700 mb-2">
-                      {contactData.form.fields[4].label}
-                    </label>
-                    <select className="w-full px-6 py-4 bg-stone-50 border-2 border-stone-200 focus:border-stone-800 outline-none font-lora transition-colors rounded">
-                      {contactData.form.fields[4].options.map(
-                        (option, index) => (
-                          <option key={index}>{option}</option>
-                        )
-                      )}
-                    </select>
-                  </div>
+                  {contactData.form.fields[4] && (
+                    <div>
+                      <label className="block font-lora text-sm font-medium text-stone-700 mb-2">
+                        {contactData.form.fields[4].label}
+                      </label>
+                      <select className="w-full px-6 py-4 bg-stone-50 border-2 border-stone-200 focus:border-stone-800 outline-none font-lora transition-colors rounded">
+                        {contactData.form.fields[4].options?.map(
+                          (option, index) => (
+                            <option key={index}>{option}</option>
+                          )
+                        )}
+                      </select>
+                    </div>
+                  )}
 
-                  <div>
-                    <label className="block font-lora text-sm font-medium text-stone-700 mb-2">
-                      {contactData.form.fields[5].label}
-                    </label>
-                    <textarea
-                      rows={contactData.form.fields[5].rows}
-                      className="w-full px-6 py-4 bg-stone-50 border-2 border-stone-200 focus:border-stone-800 outline-none font-lora transition-colors resize-none rounded"
-                      placeholder={contactData.form.fields[5].placeholder}
-                    />
-                  </div>
+                  {contactData.form.fields[5] && (
+                    <div>
+                      <label className="block font-lora text-sm font-medium text-stone-700 mb-2">
+                        {contactData.form.fields[5].label}
+                      </label>
+                      <textarea
+                        rows={contactData.form.fields[5].rows}
+                        className="w-full px-6 py-4 bg-stone-50 border-2 border-stone-200 focus:border-stone-800 outline-none font-lora transition-colors resize-none rounded"
+                        placeholder={contactData.form.fields[5].placeholder}
+                      />
+                    </div>
+                  )}
 
                   <button
                     type="submit"

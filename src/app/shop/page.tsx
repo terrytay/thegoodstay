@@ -628,10 +628,9 @@ function ShopPageContent() {
             style={{
               touchAction: "none",
               overscrollBehavior: "none",
-              // @ts-ignore
               WebkitOverscrollBehavior: "none",
               minHeight: "100vh",
-            }}
+            } as React.CSSProperties}
           >
             {loading ? (
               <div className="w-full h-full bg-stone-200 rounded-full animate-pulse" />
@@ -726,8 +725,7 @@ function ShopPageContent() {
                         transformOrigin: "center center",
                         backfaceVisibility: "hidden",
                         willChange: "transform, opacity, filter",
-                        // @ts-ignore
-                        pointerEvents: position.pointerEvents,
+                        pointerEvents: position.pointerEvents as React.CSSProperties["pointerEvents"],
                       }}
                     >
                       <div className="w-[60%] h-[100%] flex items-center justify-center">

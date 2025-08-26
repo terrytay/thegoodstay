@@ -61,6 +61,14 @@ interface AnalyticsData {
   }>;
 }
 
+interface OrderItem {
+  quantity: number;
+  price: number;
+  products: {
+    name: string;
+  }[] | null;
+}
+
 export default function AnalyticsPage() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -103,7 +111,7 @@ export default function AnalyticsPage() {
       const bookings = bookingsData.data || [];
       const customers = customersData.data || [];
       const products = productsData.data || [];
-      const orderItems = orderItemsData.data || [];
+      const orderItems: OrderItem[] = orderItemsData.data || [];
 
       // Calculate revenue metrics
       const totalRevenue = orders.reduce(
@@ -169,16 +177,15 @@ export default function AnalyticsPage() {
       ).length;
 
       // Calculate top products
-      const productSales = new Map();
+      const productSales = new Map<string, { sales: number; revenue: number }>();
       orderItems.forEach((item) => {
-        if (item.products) {
-          // @ts-ignore
-          const existing = productSales.get(item.products.name) || {
+        if (item.products && item.products.length > 0 && item.products[0]?.name) {
+          const productName = item.products[0].name;
+          const existing = productSales.get(productName) || {
             sales: 0,
             revenue: 0,
           };
-          // @ts-ignore
-          productSales.set(item.products.name, {
+          productSales.set(productName, {
             sales: existing.sales + item.quantity,
             revenue: existing.revenue + item.price * item.quantity,
           });

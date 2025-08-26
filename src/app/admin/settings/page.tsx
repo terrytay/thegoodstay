@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -40,6 +39,10 @@ interface BusinessSettings {
     advanceBookingDays: number;
     assessmentDuration: number;
     bookingBuffer: number;
+    startTime: string;
+    endTime: string;
+    timeInterval: number;
+    minAdvanceHours: number;
   };
   notifications: {
     emailNotifications: boolean;
@@ -86,6 +89,10 @@ export default function SettingsPage() {
       advanceBookingDays: 30,
       assessmentDuration: 60,
       bookingBuffer: 15,
+      startTime: "09:00",
+      endTime: "17:00",
+      timeInterval: 60,
+      minAdvanceHours: 3,
     },
     notifications: {
       emailNotifications: true,
