@@ -20,7 +20,7 @@ import {
   Plus,
 } from "lucide-react";
 import { Metadata } from "next";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useCart } from "@/context/cart-context";
 import { createClient } from "@/lib/supabase/client";
 import { useSearchParams } from "next/navigation";
@@ -38,7 +38,7 @@ interface Product {
   created_at: string;
 }
 
-export default function ShopPage() {
+function ShopPageContent() {
   const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
@@ -726,6 +726,7 @@ export default function ShopPage() {
                         transformOrigin: "center center",
                         backfaceVisibility: "hidden",
                         willChange: "transform, opacity, filter",
+                        // @ts-ignore
                         pointerEvents: position.pointerEvents,
                       }}
                     >
@@ -857,5 +858,20 @@ export default function ShopPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function ShopPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-stone-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-amber-200 border-t-amber-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-stone-600">Loading shop...</p>
+        </div>
+      </div>
+    }>
+      <ShopPageContent />
+    </Suspense>
   );
 }
