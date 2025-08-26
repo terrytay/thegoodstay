@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useState } from "react";
@@ -159,18 +158,20 @@ export default function Page() {
           {/* Why Choose Section */}
           <section className="py-24 bg-white">
             <div className="max-w-7xl mx-auto px-8 lg:px-12">
-              <div className="text-center mb-16">
-                <h2 className="font-crimson text-4xl md:text-5xl font-normal text-stone-900 mb-6">
-                  {homeData.sections[0].title}
-                </h2>
-                <p className="font-lora text-lg text-stone-700 max-w-3xl mx-auto leading-relaxed">
-                  {homeData.sections[0].subtitle}
-                </p>
-                <div className="w-24 h-px bg-amber-600 mx-auto mt-8"></div>
-              </div>
+              {homeData.sections[0] && (
+                <>
+                  <div className="text-center mb-16">
+                    <h2 className="font-crimson text-4xl md:text-5xl font-normal text-stone-900 mb-6">
+                      {homeData.sections[0].title}
+                    </h2>
+                    <p className="font-lora text-lg text-stone-700 max-w-3xl mx-auto leading-relaxed">
+                      {homeData.sections[0].subtitle}
+                    </p>
+                    <div className="w-24 h-px bg-amber-600 mx-auto mt-8"></div>
+                  </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-                {homeData.sections[0].features.map((feature, index) => {
+                  <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+                    {homeData.sections[0].features?.map((feature, index) => {
                   const Icon = getIcon(feature.icon);
                   return (
                     <div key={index} className="text-center">
@@ -186,7 +187,9 @@ export default function Page() {
                     </div>
                   );
                 })}
-              </div>
+                  </div>
+                </>
+              )}
             </div>
           </section>
 
@@ -194,32 +197,34 @@ export default function Page() {
           <section className="py-24 bg-stone-50">
             <div className="max-w-7xl mx-auto px-8 lg:px-12">
               <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-                <div>
-                  <h2 className="font-crimson text-4xl md:text-5xl font-normal text-stone-900 mb-8">
-                    {homeData.sections[1].title}
-                  </h2>
-                  <p className="font-lora text-lg text-stone-700 leading-relaxed mb-12">
-                    {homeData.sections[1].content}
-                  </p>
+                {homeData.sections[1] && (
+                  <div>
+                    <h2 className="font-crimson text-4xl md:text-5xl font-normal text-stone-900 mb-8">
+                      {homeData.sections[1].title}
+                    </h2>
+                    <p className="font-lora text-lg text-stone-700 leading-relaxed mb-12">
+                      {homeData.sections[1].content}
+                    </p>
 
-                  <div className="space-y-8">
-                    {homeData.sections[1].testimonials.map(
-                      (testimonial, index) => (
-                        <div
-                          key={index}
-                          className="border-l-4 border-amber-600 pl-6"
-                        >
-                          <blockquote className="font-lora text-stone-700 italic mb-3">
-                            "{testimonial.quote}"
-                          </blockquote>
-                          <cite className="font-lora text-sm text-stone-600 not-italic">
-                            — {testimonial.author}, {testimonial.role}
-                          </cite>
-                        </div>
-                      )
-                    )}
+                    <div className="space-y-8">
+                      {homeData.sections[1].testimonials?.map(
+                        (testimonial, index) => (
+                          <div
+                            key={index}
+                            className="border-l-4 border-amber-600 pl-6"
+                          >
+                            <blockquote className="font-lora text-stone-700 italic mb-3">
+                              "{testimonial.quote}"
+                            </blockquote>
+                            <cite className="font-lora text-sm text-stone-600 not-italic">
+                              — {testimonial.author}, {testimonial.role}
+                            </cite>
+                          </div>
+                        )
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div className="lg:order-first">
                   <div className="aspect-[4/5] bg-stone-200 rounded-lg overflow-hidden"></div>
