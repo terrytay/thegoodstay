@@ -514,7 +514,7 @@ function ShopPageContent() {
                       )}
 
                       {getQuantity(currentProducts[currentProductIndex]?.id) >
-                      0 ? (
+                      0 && (
                         <div className="flex flex-col items-center min-w-[60px]">
                           <span className="text-2xl font-light text-stone-900">
                             {getQuantity(
@@ -525,13 +525,8 @@ function ShopPageContent() {
                             in cart
                           </span>
                         </div>
-                      ) : (
-                        <span className="text-sm text-stone-500 font-medium px-4 min-w-[60px] text-center">
-                          Qty
-                        </span>
                       )}
-
-                      <button
+												{getQuantity(currentProducts[currentProductIndex]?.id) > 0 ? (<button
                         onClick={() =>
                           handleQuantityIncrease(
                             currentProducts[currentProductIndex]
@@ -546,10 +541,8 @@ function ShopPageContent() {
                         className="w-12 h-12 rounded-full border-2 border-amber-400 flex items-center justify-center text-amber-600 hover:bg-amber-50 hover:border-amber-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <Plus size={20} />
-                      </button>
-                    </div>
+                      </button>) : (
 
-                    {/* Add to Bag Button */}
                     <button
                       onClick={() =>
                         handleQuantityIncrease(
@@ -564,6 +557,10 @@ function ShopPageContent() {
                     >
                       Add to Bag
                     </button>
+		      )}
+                    </div>
+
+                    {/* Add to Bag Button */}
                   </div>
                 )}
               </div>
