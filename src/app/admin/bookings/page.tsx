@@ -1,86 +1,108 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { Calendar, Dog, Phone, Mail, Search, Download, MessageSquare, User, MapPin, Heart, AlertCircle, CheckCircle2, XCircle, Clock, MailCheck } from 'lucide-react'
-import { formatSingaporeDateForDisplay, formatSingaporeTimeForDisplay, toSingaporeTime, createSingaporeDate } from '@/lib/utils/singapore-timezone'
+import { useState, useEffect, useCallback } from "react";
+import { createClient } from "@/lib/supabase/client";
+import {
+  Calendar,
+  Dog,
+  Phone,
+  Mail,
+  Search,
+  Download,
+  MessageSquare,
+  User,
+  MapPin,
+  Heart,
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  MailCheck,
+} from "lucide-react";
+import {
+  formatSingaporeDateForDisplay,
+  formatSingaporeTimeForDisplay,
+  toSingaporeTime,
+  createSingaporeDate,
+} from "@/lib/utils/singapore-timezone";
 
 interface Booking {
-  id: string
-  user_id: string | null
-  booking_token: string | null
-  
+  id: string;
+  user_id: string | null;
+  booking_token: string | null;
+
   // Dog Information
-  dog_name: string
-  dog_first_name: string | null
-  dog_last_name: string | null
-  dog_breed: string | null
-  dog_age: string | null // Now text, not number
-  dog_gender_neuter: string | null
-  
+  dog_name: string;
+  dog_first_name: string | null;
+  dog_last_name: string | null;
+  dog_breed: string | null;
+  dog_age: string | null; // Now text, not number
+  dog_gender_neuter: string | null;
+
   // Owner Information
-  owner_name: string | null
-  owner_first_name: string | null
-  owner_last_name: string | null
-  owner_email: string | null
-  contact_area_code: string | null
-  contact_phone: string | null
-  address_street1: string | null
-  address_street2: string | null
-  address_city: string | null
-  address_state: string | null
-  address_postal: string | null
-  instagram: string | null
-  
+  owner_name: string | null;
+  owner_first_name: string | null;
+  owner_last_name: string | null;
+  owner_email: string | null;
+  contact_area_code: string | null;
+  contact_phone: string | null;
+  address_street1: string | null;
+  address_street2: string | null;
+  address_city: string | null;
+  address_state: string | null;
+  address_postal: string | null;
+  instagram: string | null;
+
   // Booking Details
-  preferred_date: string
-  preferred_time: string | null
-  location_type: string | null
-  home_visit_fee: number | null
-  payment_required: boolean | null
-  payment_amount: number | null
-  total_paid: number | null
-  
+  preferred_date: string;
+  preferred_time: string | null;
+  location_type: string | null;
+  home_visit_fee: number | null;
+  payment_required: boolean | null;
+  payment_amount: number | null;
+  total_paid: number | null;
+
   // Assessment Data
-  reaction_to_new_people: any | null
-  bite_history: string | null
-  vaccination_status: string | null
-  current_medical_issues: string | null
-  food_allergies: string | null
-  
+  reaction_to_new_people: any | null;
+  bite_history: string | null;
+  vaccination_status: string | null;
+  current_medical_issues: string | null;
+  food_allergies: string | null;
+
   // Status and Metadata
-  status: string
-  booking_status: string | null
-  created_at: string
-  updated_at: string | null
-  notes: string | null
-  terms_accepted: boolean | null
-  terms_accepted_at: string | null
-  signature_completed: boolean | null
-  
+  status: string;
+  booking_status: string | null;
+  created_at: string;
+  updated_at: string | null;
+  notes: string | null;
+  terms_accepted: boolean | null;
+  terms_accepted_at: string | null;
+  signature_completed: boolean | null;
+
   // Email Tracking (from previous session enhancements)
-  confirmation_email_sent: boolean | null
-  confirmation_email_sent_at: string | null
-  email_send_attempts: number | null
-  last_email_error: string | null
-  
+  confirmation_email_sent: boolean | null;
+  confirmation_email_sent_at: string | null;
+  email_send_attempts: number | null;
+  last_email_error: string | null;
+
   // Calendar Integration
-  calendar_event_id: string | null
+  calendar_event_id: string | null;
 }
 
 export default function BookingsPage() {
-  const [bookings, setBookings] = useState<Booking[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
-  const [dateFilter, setDateFilter] = useState('all')
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("all");
 
   const fetchBookings = useCallback(async () => {
     try {
-      const supabase = createClient()
+      const supabase = createClient();
       let query = supabase
-        .from('bookings')
-        .select(`
+        .from("bookings")
+        .select(
+          `
           id,
           user_id,
           booking_token,
@@ -127,11 +149,12 @@ export default function BookingsPage() {
           email_send_attempts,
           last_email_error,
           calendar_event_id
-        `)
-        .order('created_at', { ascending: false })
+        `
+        )
+        .order("created_at", { ascending: false });
 
-      if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter)
+      if (statusFilter !== "all") {
+        query = query.eq("status", statusFilter);
       }
 
       if (searchTerm) {
@@ -142,131 +165,132 @@ export default function BookingsPage() {
           owner_email.ilike.%${searchTerm}%,
           contact_phone.ilike.%${searchTerm}%,
           booking_token.ilike.%${searchTerm}%
-        `)
+        `);
       }
 
-      if (dateFilter === 'today') {
-        const today = new Date().toISOString().split('T')[0]
-        query = query.eq('preferred_date', today)
-      } else if (dateFilter === 'upcoming') {
-        const today = new Date().toISOString().split('T')[0]
-        query = query.gte('preferred_date', today)
-      } else if (dateFilter === 'past') {
-        const today = new Date().toISOString().split('T')[0]
-        query = query.lt('preferred_date', today)
+      if (dateFilter === "today") {
+        const today = new Date().toISOString().split("T")[0];
+        query = query.eq("preferred_date", today);
+      } else if (dateFilter === "upcoming") {
+        const today = new Date().toISOString().split("T")[0];
+        query = query.gte("preferred_date", today);
+      } else if (dateFilter === "past") {
+        const today = new Date().toISOString().split("T")[0];
+        query = query.lt("preferred_date", today);
       }
 
-      const { data, error } = await query
+      const { data, error } = await query;
 
       if (error) {
-        console.error('Error fetching bookings:', error)
-        setBookings([])
+        console.error("Error fetching bookings:", error);
+        setBookings([]);
       } else {
-        setBookings(data || [])
+        setBookings(data || []);
       }
     } catch (err) {
-      console.error('Error:', err)
-      setBookings([])
+      console.error("Error:", err);
+      setBookings([]);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [searchTerm, statusFilter, dateFilter])
+  }, [searchTerm, statusFilter, dateFilter]);
 
   useEffect(() => {
-    fetchBookings()
-  }, [fetchBookings])
+    fetchBookings();
+  }, [fetchBookings]);
 
   const updateBookingStatus = async (bookingId: string, newStatus: string) => {
     try {
-      const supabase = createClient()
-      
+      const supabase = createClient();
+
       // Update booking status
       const { error } = await supabase
-        .from('bookings')
-        .update({ 
+        .from("bookings")
+        .update({
           status: newStatus,
-          booking_status: newStatus === 'confirmed' ? 'confirmed' : undefined
+          booking_status: newStatus === "confirmed" ? "confirmed" : undefined,
         })
-        .eq('id', bookingId)
+        .eq("id", bookingId);
 
       if (error) {
-        console.error('Error updating booking status:', error)
-        return
+        console.error("Error updating booking status:", error);
+        return;
       }
 
       // Handle calendar events based on status change
-      if (newStatus === 'confirmed') {
+      if (newStatus === "confirmed") {
         // Create calendar event for confirmed bookings
         try {
-          await fetch('/api/calendar/create-booking-event', {
-            method: 'POST',
+          await fetch("/api/calendar/create-booking-event", {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({ bookingId }),
-          })
+          });
         } catch (calendarError) {
-          console.error('Failed to create calendar event:', calendarError)
+          console.error("Failed to create calendar event:", calendarError);
           // Don't fail the booking confirmation if calendar event fails
         }
-      } else if (newStatus === 'cancelled') {
+      } else if (newStatus === "cancelled") {
         // Delete calendar event for cancelled bookings
         try {
-          await fetch('/api/calendar/delete-booking-event', {
-            method: 'POST',
+          await fetch("/api/calendar/delete-booking-event", {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({ bookingId }),
-          })
+          });
         } catch (calendarError) {
-          console.error('Failed to delete calendar event:', calendarError)
+          console.error("Failed to delete calendar event:", calendarError);
           // Don't fail the booking cancellation if calendar event deletion fails
         }
       }
 
       // Update local state
-      setBookings(prev =>
-        prev.map(booking =>
+      setBookings((prev) =>
+        prev.map((booking) =>
           booking.id === bookingId ? { ...booking, status: newStatus } : booking
         )
-      )
+      );
     } catch (err) {
-      console.error('Error:', err)
+      console.error("Error:", err);
     }
-  }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed':
-        return 'bg-green-100 text-green-800'
-      case 'completed':
-        return 'bg-blue-100 text-blue-800'
-      case 'cancelled':
-        return 'bg-red-100 text-red-800'
-      case 'pending':
+      case "confirmed":
+        return "bg-green-100 text-green-800";
+      case "completed":
+        return "bg-blue-100 text-blue-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
+      case "pending":
       default:
-        return 'bg-yellow-100 text-yellow-800'
+        return "bg-yellow-100 text-yellow-800";
     }
-  }
+  };
 
   // Get proper contact info from database fields
   const getContactInfo = (booking: Booking) => {
-    const name = booking.owner_name || 
-      (booking.owner_first_name && booking.owner_last_name ? 
-        `${booking.owner_first_name} ${booking.owner_last_name}` : 
-        booking.owner_first_name || 'Unknown');
-    
-    const email = booking.owner_email || 'No email provided';
-    
-    const phone = booking.contact_phone ? 
-      (booking.contact_area_code ? 
-        `${booking.contact_area_code}-${booking.contact_phone}` : 
-        booking.contact_phone) : 
-      'No phone provided';
-    
+    const name =
+      booking.owner_name ||
+      (booking.owner_first_name && booking.owner_last_name
+        ? `${booking.owner_first_name} ${booking.owner_last_name}`
+        : booking.owner_first_name || "Unknown");
+
+    const email = booking.owner_email || "No email provided";
+
+    const phone = booking.contact_phone
+      ? booking.contact_area_code
+        ? `${booking.contact_area_code}-${booking.contact_phone}`
+        : booking.contact_phone
+      : "No phone provided";
+
     return { name, email, phone };
-  }
+  };
 
   // Get full address
   const getFullAddress = (booking: Booking) => {
@@ -275,63 +299,85 @@ export default function BookingsPage() {
       booking.address_street2,
       booking.address_city,
       booking.address_state,
-      booking.address_postal
+      booking.address_postal,
     ].filter(Boolean);
-    return parts.length > 0 ? parts.join(', ') : 'No address provided';
-  }
+    return parts.length > 0 ? parts.join(", ") : "No address provided";
+  };
 
   const exportBookings = async () => {
     try {
       const csv = [
-        ['Booking Token', 'Dog Name', 'Dog Breed', 'Dog Age', 'Owner Name', 'Email', 'Phone', 'Address', 'Preferred Date', 'Preferred Time', 'Location Type', 'Status', 'Booking Status', 'Payment Required', 'Amount Paid', 'Vaccination Status', 'Created'].join(','),
-        ...bookings.map(booking => {
-          const contact = getContactInfo(booking)
-          const address = getFullAddress(booking)
-          const sgCreated = toSingaporeTime(new Date(booking.created_at))
-          const sgPreferredDate = formatSingaporeDateForDisplay(booking.preferred_date)
-          
+        [
+          "Booking Token",
+          "Dog Name",
+          "Dog Breed",
+          "Dog Age",
+          "Owner Name",
+          "Email",
+          "Phone",
+          "Address",
+          "Preferred Date",
+          "Preferred Time",
+          "Location Type",
+          "Status",
+          "Booking Status",
+          "Payment Required",
+          "Amount Paid",
+          "Vaccination Status",
+          "Created",
+        ].join(","),
+        ...bookings.map((booking) => {
+          const contact = getContactInfo(booking);
+          const address = getFullAddress(booking);
+          const sgCreated = toSingaporeTime(new Date(booking.created_at));
+          const sgPreferredDate = formatSingaporeDateForDisplay(
+            booking.preferred_date
+          );
+
           return [
             booking.booking_token || booking.id,
             booking.dog_name,
-            booking.dog_breed || 'Not specified',
-            booking.dog_age || 'Not specified',
+            booking.dog_breed || "Not specified",
+            booking.dog_age || "Not specified",
             contact.name,
             contact.email,
             contact.phone,
             address,
             sgPreferredDate,
-            booking.preferred_time || 'Not specified',
-            booking.location_type === 'home' ? 'Home Visit' : 'Park Visit',
+            booking.preferred_time || "Not specified",
+            booking.location_type === "home" ? "Home Visit" : "Park Visit",
             booking.status,
-            booking.booking_status || 'N/A',
-            booking.payment_required ? 'Yes' : 'No',
-            booking.total_paid ? `$${booking.total_paid}` : '$0',
-            booking.vaccination_status || 'Not specified',
-            sgCreated.toLocaleDateString('en-SG')
-          ].join(',')
-        })
-      ].join('\n')
+            booking.booking_status || "N/A",
+            booking.payment_required ? "Yes" : "No",
+            booking.total_paid ? `$${booking.total_paid}` : "$0",
+            booking.vaccination_status || "Not specified",
+            sgCreated.toLocaleDateString("en-SG"),
+          ].join(",");
+        }),
+      ].join("\n");
 
-      const blob = new Blob([csv], { type: 'text/csv' })
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `bookings-${new Date().toISOString().split('T')[0]}.csv`
-      a.click()
-      window.URL.revokeObjectURL(url)
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `bookings-${new Date().toISOString().split("T")[0]}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
     } catch (err) {
-      console.error('Error exporting bookings:', err)
+      console.error("Error exporting bookings:", err);
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="p-6">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-neutral-900 mb-2">Assessment Bookings</h1>
+          <h1 className="text-2xl font-bold text-neutral-900 mb-2">
+            Assessment Bookings
+          </h1>
           <p className="text-neutral-600">Manage assessment visit requests</p>
         </div>
-        
+
         <div className="bg-white rounded-xl shadow-sm border border-neutral-200">
           <div className="p-6">
             <div className="animate-pulse space-y-6">
@@ -342,15 +388,19 @@ export default function BookingsPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="p-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-neutral-900 mb-2">Assessment Bookings</h1>
-        <p className="text-neutral-600">Manage assessment visit requests from potential clients</p>
+        <h1 className="text-2xl font-bold text-neutral-900 mb-2">
+          Assessment Bookings
+        </h1>
+        <p className="text-neutral-600">
+          Manage assessment visit requests from potential clients
+        </p>
       </div>
 
       {/* Filters and Actions */}
@@ -413,18 +463,24 @@ export default function BookingsPage() {
         {bookings.length === 0 ? (
           <div className="p-12 text-center">
             <Calendar className="h-12 w-12 text-neutral-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-neutral-900 mb-2">No Bookings Found</h3>
-            <p className="text-neutral-600">No assessment bookings match your current filters.</p>
+            <h3 className="text-lg font-medium text-neutral-900 mb-2">
+              No Bookings Found
+            </h3>
+            <p className="text-neutral-600">
+              No assessment bookings match your current filters.
+            </p>
           </div>
         ) : (
           <div className="divide-y divide-neutral-200">
             {bookings.map((booking) => {
-              const contactInfo = getContactInfo(booking)
-              const fullAddress = getFullAddress(booking)
-              const sgPreferredDate = toSingaporeTime(new Date(booking.preferred_date + 'T00:00:00'))
-              const sgNow = toSingaporeTime(new Date())
-              const isUpcoming = sgPreferredDate >= sgNow
-              
+              const contactInfo = getContactInfo(booking);
+              const fullAddress = getFullAddress(booking);
+              const sgPreferredDate = toSingaporeTime(
+                new Date(booking.preferred_date + "T00:00:00")
+              );
+              const sgNow = toSingaporeTime(new Date());
+              const isUpcoming = sgPreferredDate >= sgNow;
+
               return (
                 <div key={booking.id} className="p-6 hover:bg-neutral-50">
                   <div className="flex items-start justify-between mb-4">
@@ -442,26 +498,31 @@ export default function BookingsPage() {
                           )}
                         </h3>
                         <p className="text-neutral-600">
-                          {booking.dog_breed || 'Mixed Breed'} 
+                          {booking.dog_breed || "Mixed Breed"}
                           {booking.dog_age && ` • ${booking.dog_age}`}
-                          {booking.dog_gender_neuter && ` • ${booking.dog_gender_neuter}`}
+                          {booking.dog_gender_neuter &&
+                            ` • ${booking.dog_gender_neuter}`}
                         </p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center space-x-3">
                       <select
                         value={booking.status}
-                        onChange={(e) => updateBookingStatus(booking.id, e.target.value)}
-                        className={`inline-flex px-3 py-1 text-sm font-medium rounded-full capitalize border-none ${getStatusColor(booking.status)}`}
+                        onChange={(e) =>
+                          updateBookingStatus(booking.id, e.target.value)
+                        }
+                        className={`inline-flex px-3 py-1 text-sm font-medium rounded-full capitalize border-none ${getStatusColor(
+                          booking.status
+                        )}`}
                       >
                         <option value="pending">Pending</option>
                         <option value="confirmed">Confirmed</option>
                         <option value="completed">Completed</option>
                         <option value="cancelled">Cancelled</option>
                       </select>
-                      
-                      {isUpcoming && booking.status === 'pending' && (
+
+                      {isUpcoming && booking.status === "pending" && (
                         <div className="w-3 h-3 bg-amber-500 rounded-full animate-pulse"></div>
                       )}
                     </div>
@@ -470,9 +531,13 @@ export default function BookingsPage() {
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {/* Contact Information */}
                     <div>
-                      <h4 className="font-medium text-neutral-900 mb-3">Owner Information</h4>
+                      <h4 className="font-medium text-neutral-900 mb-3">
+                        Owner Information
+                      </h4>
                       <div className="space-y-2">
-                        <p className="text-neutral-700 font-medium">{contactInfo.name}</p>
+                        <p className="text-neutral-700 font-medium">
+                          {contactInfo.name}
+                        </p>
                         <div className="flex items-center space-x-2 text-sm text-neutral-600">
                           <Mail className="h-4 w-4" />
                           <span>{contactInfo.email}</span>
@@ -486,38 +551,52 @@ export default function BookingsPage() {
 
                     {/* Appointment Details */}
                     <div>
-                      <h4 className="font-medium text-neutral-900 mb-3">Appointment Details</h4>
+                      <h4 className="font-medium text-neutral-900 mb-3">
+                        Appointment Details
+                      </h4>
                       <div className="space-y-2">
                         <div className="flex items-center space-x-2 text-sm text-neutral-600">
                           <Calendar className="h-4 w-4" />
-                          <span>{formatSingaporeDateForDisplay(booking.preferred_date)}</span>
-                          {booking.preferred_time && <span>at {formatSingaporeTimeForDisplay(createSingaporeDate(booking.preferred_date, booking.preferred_time))}</span>}
+                          <span>
+                            {formatSingaporeDateForDisplay(
+                              booking.preferred_date
+                            )}
+                          </span>
+                          {booking.preferred_time && (
+                            <span>
+                              at{" "}
+                              {(booking.preferred_date, booking.preferred_time)}
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center space-x-2 text-sm text-neutral-600">
                           <MapPin className="h-4 w-4" />
                           <span>
-                            {booking.location_type === 'home' ? 
-                              `Home Visit (+$${booking.home_visit_fee || 25})` : 
-                              'Clementi Woods Park (Free)'
-                            }
+                            {booking.location_type === "home"
+                              ? `Home Visit (+$${booking.home_visit_fee || 25})`
+                              : "Clementi Woods Park (Free)"}
                           </span>
                         </div>
                         {booking.payment_required && (
                           <div className="flex items-center space-x-2 text-sm">
-                            <span className={`px-2 py-1 rounded text-xs ${
-                              booking.total_paid && booking.total_paid > 0 ? 
-                                'bg-green-100 text-green-800' : 
-                                'bg-yellow-100 text-yellow-800'
-                            }`}>
-                              {booking.total_paid && booking.total_paid > 0 ? 
-                                `Paid: $${booking.total_paid}` : 
-                                `Payment Required: $${booking.payment_amount || 25}`
-                              }
+                            <span
+                              className={`px-2 py-1 rounded text-xs ${
+                                booking.total_paid && booking.total_paid > 0
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-yellow-100 text-yellow-800"
+                              }`}
+                            >
+                              {booking.total_paid && booking.total_paid > 0
+                                ? `Paid: $${booking.total_paid}`
+                                : `Payment Required: $${
+                                    booking.payment_amount || 25
+                                  }`}
                             </span>
                           </div>
                         )}
                         <p className="text-xs text-neutral-500">
-                          Requested on {formatSingaporeDateForDisplay(booking.created_at)}
+                          Requested on{" "}
+                          {formatSingaporeDateForDisplay(booking.created_at)}
                         </p>
                       </div>
                     </div>
@@ -531,45 +610,56 @@ export default function BookingsPage() {
                       <div className="space-y-2">
                         {booking.vaccination_status && (
                           <div className="flex items-center space-x-2 text-sm">
-                            <span className="text-neutral-600">Vaccinated:</span>
-                            <span className={`px-2 py-1 rounded text-xs ${
-                              booking.vaccination_status === 'Yes' ? 
-                                'bg-green-100 text-green-800' : 
-                                'bg-red-100 text-red-800'
-                            }`}>
+                            <span className="text-neutral-600">
+                              Vaccinated:
+                            </span>
+                            <span
+                              className={`px-2 py-1 rounded text-xs ${
+                                booking.vaccination_status === "Yes"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-red-100 text-red-800"
+                              }`}
+                            >
                               {booking.vaccination_status}
                             </span>
                           </div>
                         )}
                         {booking.bite_history && (
                           <div className="flex items-center space-x-2 text-sm">
-                            <span className="text-neutral-600">Bite History:</span>
-                            <span className={`px-2 py-1 rounded text-xs ${
-                              booking.bite_history === 'No' ? 
-                                'bg-green-100 text-green-800' : 
-                                'bg-orange-100 text-orange-800'
-                            }`}>
+                            <span className="text-neutral-600">
+                              Bite History:
+                            </span>
+                            <span
+                              className={`px-2 py-1 rounded text-xs ${
+                                booking.bite_history === "No"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-orange-100 text-orange-800"
+                              }`}
+                            >
                               {booking.bite_history}
                             </span>
                           </div>
                         )}
                         {booking.current_medical_issues && (
                           <p className="text-xs text-neutral-600 bg-blue-50 p-2 rounded">
-                            <span className="font-medium">Medical Issues:</span> {booking.current_medical_issues}
+                            <span className="font-medium">Medical Issues:</span>{" "}
+                            {booking.current_medical_issues}
                           </p>
                         )}
                         {booking.food_allergies && (
                           <p className="text-xs text-neutral-600 bg-yellow-50 p-2 rounded">
-                            <span className="font-medium">Food Allergies:</span> {booking.food_allergies}
+                            <span className="font-medium">Food Allergies:</span>{" "}
+                            {booking.food_allergies}
                           </p>
                         )}
                         {booking.reaction_to_new_people && (
                           <p className="text-xs text-neutral-600 bg-purple-50 p-2 rounded">
-                            <span className="font-medium">Reaction to New People:</span> {
-                              Array.isArray(booking.reaction_to_new_people) ? 
-                                booking.reaction_to_new_people.join(', ') : 
-                                booking.reaction_to_new_people
-                            }
+                            <span className="font-medium">
+                              Reaction to New People:
+                            </span>{" "}
+                            {Array.isArray(booking.reaction_to_new_people)
+                              ? booking.reaction_to_new_people.join(", ")
+                              : booking.reaction_to_new_people}
                           </p>
                         )}
                       </div>
@@ -586,10 +676,15 @@ export default function BookingsPage() {
                           {booking.confirmation_email_sent ? (
                             <>
                               <CheckCircle2 className="h-4 w-4 text-green-500" />
-                              <span className="text-green-700 font-medium">Email Sent</span>
+                              <span className="text-green-700 font-medium">
+                                Email Sent
+                              </span>
                               {booking.confirmation_email_sent_at && (
                                 <span className="text-neutral-500">
-                                  on {formatSingaporeDateForDisplay(booking.confirmation_email_sent_at)}
+                                  on{" "}
+                                  {formatSingaporeDateForDisplay(
+                                    booking.confirmation_email_sent_at
+                                  )}
                                 </span>
                               )}
                             </>
@@ -598,17 +693,22 @@ export default function BookingsPage() {
                               {booking.last_email_error ? (
                                 <>
                                   <XCircle className="h-4 w-4 text-red-500" />
-                                  <span className="text-red-700 font-medium">Email Failed</span>
+                                  <span className="text-red-700 font-medium">
+                                    Email Failed
+                                  </span>
                                   {booking.email_send_attempts && (
                                     <span className="text-red-500 text-xs">
                                       ({booking.email_send_attempts} attempts)
                                     </span>
                                   )}
                                 </>
-                              ) : booking.email_send_attempts && booking.email_send_attempts > 0 ? (
+                              ) : booking.email_send_attempts &&
+                                booking.email_send_attempts > 0 ? (
                                 <>
                                   <Clock className="h-4 w-4 text-yellow-500" />
-                                  <span className="text-yellow-700 font-medium">Processing</span>
+                                  <span className="text-yellow-700 font-medium">
+                                    Processing
+                                  </span>
                                   <span className="text-yellow-600 text-xs">
                                     ({booking.email_send_attempts} attempts)
                                   </span>
@@ -616,7 +716,9 @@ export default function BookingsPage() {
                               ) : (
                                 <>
                                   <XCircle className="h-4 w-4 text-neutral-400" />
-                                  <span className="text-neutral-600">Not Sent</span>
+                                  <span className="text-neutral-600">
+                                    Not Sent
+                                  </span>
                                 </>
                               )}
                             </>
@@ -624,7 +726,8 @@ export default function BookingsPage() {
                         </div>
                         {booking.last_email_error && (
                           <p className="text-xs text-red-600 bg-red-50 p-2 rounded">
-                            <span className="font-medium">Last Error:</span> {booking.last_email_error}
+                            <span className="font-medium">Last Error:</span>{" "}
+                            {booking.last_email_error}
                           </p>
                         )}
                       </div>
@@ -633,7 +736,9 @@ export default function BookingsPage() {
                     {/* Notes */}
                     {booking.notes && (
                       <div>
-                        <h4 className="font-medium text-neutral-900 mb-3">Notes</h4>
+                        <h4 className="font-medium text-neutral-900 mb-3">
+                          Notes
+                        </h4>
                         <div className="space-y-2">
                           <p className="text-sm text-neutral-600 bg-neutral-50 p-2 rounded">
                             {booking.notes}
@@ -645,10 +750,12 @@ export default function BookingsPage() {
 
                   {/* Actions */}
                   <div className="mt-6 flex flex-wrap gap-2">
-                    {booking.status === 'pending' && (
+                    {booking.status === "pending" && (
                       <>
                         <button
-                          onClick={() => updateBookingStatus(booking.id, 'confirmed')}
+                          onClick={() =>
+                            updateBookingStatus(booking.id, "confirmed")
+                          }
                           className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
                         >
                           Confirm Booking
@@ -659,30 +766,34 @@ export default function BookingsPage() {
                         </button>
                       </>
                     )}
-                    
-                    {booking.status === 'confirmed' && (
+
+                    {booking.status === "confirmed" && (
                       <button
-                        onClick={() => updateBookingStatus(booking.id, 'completed')}
+                        onClick={() =>
+                          updateBookingStatus(booking.id, "completed")
+                        }
                         className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
                       >
                         Mark Complete
                       </button>
                     )}
-                    
-                    <button 
-                      onClick={() => window.location.href = `/admin/bookings/${booking.id}`}
+
+                    <button
+                      onClick={() =>
+                        (window.location.href = `/admin/bookings/${booking.id}`)
+                      }
                       className="bg-neutral-100 text-neutral-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-200 transition-colors"
                     >
                       View Full Details
                     </button>
-                    
+
                     {booking.signature_completed && (
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                         <AlertCircle className="h-3 w-3 mr-1" />
                         Signed
                       </span>
                     )}
-                    
+
                     {booking.terms_accepted && (
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         Terms Accepted
@@ -690,7 +801,7 @@ export default function BookingsPage() {
                     )}
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
         )}
@@ -700,15 +811,17 @@ export default function BookingsPage() {
           <div className="px-6 py-4 border-t border-neutral-200 bg-neutral-50">
             <div className="flex items-center justify-between">
               <div className="text-sm text-neutral-500">
-                Showing {bookings.length} booking{bookings.length !== 1 ? 's' : ''}
+                Showing {bookings.length} booking
+                {bookings.length !== 1 ? "s" : ""}
               </div>
               <div className="text-xs text-neutral-400">
-                Total pending: {bookings.filter(b => b.status === 'pending').length}
+                Total pending:{" "}
+                {bookings.filter((b) => b.status === "pending").length}
               </div>
             </div>
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }
