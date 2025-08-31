@@ -105,7 +105,7 @@ export async function sendBookingConfirmationEmail(
           
           <div style="margin: 30px 0; text-align: center;">
             <p style="color: #6b7280; font-size: 14px;">
-              If you have any questions, please don't hesitate to contact us.
+              If you have any questions, please don't hesitate to contact me.
             </p>
           </div>
         </div>

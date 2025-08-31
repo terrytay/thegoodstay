@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { Suspense, useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { XCircle, CreditCard, ArrowLeft, Loader } from 'lucide-react';
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { XCircle, CreditCard, ArrowLeft, Loader } from "lucide-react";
 
 function BookingCancelledContent() {
   const searchParams = useSearchParams();
-  const sessionId = searchParams.get('session_id');
+  const sessionId = searchParams.get("session_id");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-50 to-amber-50 flex items-center justify-center">
@@ -29,7 +29,8 @@ function BookingCancelledContent() {
             <span className="font-lora font-medium">No Payment Processed</span>
           </div>
           <p className="text-orange-700 text-sm">
-            Your booking is still pending. You can complete the payment anytime to confirm your appointment.
+            Your booking is still pending. You can complete the payment anytime
+            to confirm your appointment.
           </p>
         </div>
 
@@ -41,7 +42,7 @@ function BookingCancelledContent() {
             <ArrowLeft className="h-4 w-4 inline mr-2" />
             Return to Booking
           </a>
-          
+
           <a
             href="/"
             className="w-full inline-block bg-stone-500 text-white px-6 py-3 rounded-lg font-lora hover:bg-stone-600 transition-colors"
@@ -51,13 +52,19 @@ function BookingCancelledContent() {
         </div>
 
         <div className="mt-8 p-4 bg-stone-100 rounded-lg">
-          <h3 className="font-lora font-semibold text-stone-900 mb-2">Need Help?</h3>
+          <h3 className="font-lora font-semibold text-stone-900 mb-2">
+            Need Help?
+          </h3>
           <p className="font-lora text-stone-600 text-sm mb-2">
-            If you experienced any issues during the payment process, please contact us.
+            If you experienced any issues during the payment process, please
+            contact us.
           </p>
           <p className="font-lora text-stone-900 font-medium">
-            <a href="mailto:hello@thegoodstay.com" className="text-amber-600 hover:text-amber-700">
-              hello@thegoodstay.com
+            <a
+              href="mailto:thegoodstaysg@gmail.com"
+              className="text-amber-600 hover:text-amber-700"
+            >
+              thegoodstaysg@gmail.com
             </a>
           </p>
         </div>
@@ -74,14 +81,16 @@ function BookingCancelledContent() {
 
 export default function BookingCancelledPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-stone-50 to-amber-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader className="animate-spin h-12 w-12 text-amber-500 mx-auto mb-4" />
-          <p className="font-lora text-stone-600">Loading...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-br from-stone-50 to-amber-50 flex items-center justify-center">
+          <div className="text-center">
+            <Loader className="animate-spin h-12 w-12 text-amber-500 mx-auto mb-4" />
+            <p className="font-lora text-stone-600">Loading...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <BookingCancelledContent />
     </Suspense>
   );

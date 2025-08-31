@@ -41,7 +41,7 @@ export default function Footer() {
               </div>
               <div className="flex items-center space-x-3 text-neutral-300">
                 <Mail className="h-5 w-5 text-amber-400" />
-                <span>hello@thegoodstay.com</span>
+                <span>thegoodstaysg@gmail.com</span>
               </div>
               <div className="flex items-center space-x-3 text-neutral-300">
                 <MapPin className="h-5 w-5 text-amber-400" />

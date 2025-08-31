@@ -56,8 +56,8 @@ export class DocumentGenerator {
     name: "The Good Stay",
     address: "Singapore",
     phone: "+65 XXXX XXXX",
-    email: "hello@thegoodstay.sg",
-    website: "www.thegoodstay.sg",
+    email: "thegoodstaysg@gmail.com",
+    website: "https://thegoodstay.vercel.app",
   };
 
   private static readonly COLORS = {
