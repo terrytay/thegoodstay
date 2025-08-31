@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+// DEPRECATED: This route is maintained for backward compatibility only
+// Use /api/verify-payment/[sessionId] for secure payment verification instead
 export async function GET(
   request: NextRequest,
-  { params }: { params: { token: string } }
+  { params }: { params: Promise<{ token: string }> }
 ) {
   try {
-    const { token } = params;
+    const { token } = await params;
 
     if (!token) {
       return NextResponse.json(
@@ -14,6 +16,9 @@ export async function GET(
         { status: 400 }
       );
     }
+
+    console.log(`[DEPRECATED] /api/booking/[token] accessed with token: ${token}`);
+    console.log('[DEPRECATED] Consider migrating to /api/verify-payment/[sessionId] for secure verification');
 
     // Create Supabase client
     const supabase = createClient(
