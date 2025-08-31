@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-// DEPRECATED: This route is maintained for backward compatibility only
-// Use /api/verify-payment/[sessionId] for secure payment verification instead
+// Route for fetching booking details by booking token
+// Used by admin panel, document generation, and other internal systems
+// Note: This is different from payment verification - use /api/verify-payment/[sessionId] for that
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ token: string }> }

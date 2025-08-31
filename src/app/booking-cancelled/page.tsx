@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { XCircle, CreditCard, ArrowLeft } from 'lucide-react';
+import { XCircle, CreditCard, ArrowLeft, Loader } from 'lucide-react';
 
-export default function BookingCancelledPage() {
+function BookingCancelledContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
 
@@ -69,5 +69,20 @@ export default function BookingCancelledPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function BookingCancelledPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-stone-50 to-amber-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader className="animate-spin h-12 w-12 text-amber-500 mx-auto mb-4" />
+          <p className="font-lora text-stone-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <BookingCancelledContent />
+    </Suspense>
   );
 }

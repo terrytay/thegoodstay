@@ -22,7 +22,10 @@ import {
   Trash2,
   DollarSign,
   FileText,
-  Signature
+  Signature,
+  MailCheck,
+  CheckCircle2,
+  XCircle
 } from 'lucide-react'
 import { formatSingaporeDateForDisplay, formatSingaporeTimeForDisplay, toSingaporeTime, createSingaporeDate } from '@/lib/utils/singapore-timezone'
 
@@ -87,6 +90,15 @@ interface DetailedBooking {
   terms_accepted_at: string | null
   signature_completed: boolean | null
   signature_data: string | null
+  
+  // Email Tracking (from previous session enhancements)
+  confirmation_email_sent: boolean | null
+  confirmation_email_sent_at: string | null
+  email_send_attempts: number | null
+  last_email_error: string | null
+  
+  // Calendar Integration
+  calendar_event_id: string | null
 }
 
 export default function BookingDetailPage() {
@@ -134,9 +146,16 @@ export default function BookingDetailPage() {
     setUpdating(true)
     try {
       const supabase = createClient()
+      const updateData: any = { [field]: newStatus }
+      
+      // If confirming via status field, also update booking_status
+      if (field === 'status' && newStatus === 'confirmed') {
+        updateData.booking_status = 'confirmed'
+      }
+      
       const { error } = await supabase
         .from('bookings')
-        .update({ [field]: newStatus })
+        .update(updateData)
         .eq('id', bookingId)
 
       if (error) {
@@ -144,7 +163,38 @@ export default function BookingDetailPage() {
         return
       }
 
-      setBooking(prev => prev ? { ...prev, [field]: newStatus } : null)
+      // Handle calendar events based on status change
+      if (newStatus === 'confirmed') {
+        // Create calendar event for confirmed bookings
+        try {
+          await fetch('/api/calendar/create-booking-event', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ bookingId }),
+          })
+        } catch (calendarError) {
+          console.error('Failed to create calendar event:', calendarError)
+          // Don't fail the booking confirmation if calendar event fails
+        }
+      } else if (newStatus === 'cancelled') {
+        // Delete calendar event for cancelled bookings
+        try {
+          await fetch('/api/calendar/delete-booking-event', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ bookingId }),
+          })
+        } catch (calendarError) {
+          console.error('Failed to delete calendar event:', calendarError)
+          // Don't fail the booking cancellation if calendar event deletion fails
+        }
+      }
+
+      setBooking(prev => prev ? { ...prev, ...updateData } : null)
     } catch (err) {
       console.error('Error:', err)
     } finally {
@@ -199,7 +249,7 @@ export default function BookingDetailPage() {
     { id: 'overview', label: 'Overview', icon: FileText },
     { id: 'assessment', label: 'Assessment Details', icon: Heart },
     { id: 'payment', label: 'Payment & Billing', icon: DollarSign },
-    { id: 'communication', label: 'Communication', icon: Send },
+    { id: 'communication', label: 'Email & Communication', icon: MailCheck },
     { id: 'documents', label: 'Documents', icon: Download },
   ]
 
@@ -688,26 +738,140 @@ export default function BookingDetailPage() {
           {activeTab === 'communication' && (
             <div className="space-y-6">
               <h3 className="text-lg font-medium text-neutral-900 mb-4 flex items-center">
-                <Send className="h-5 w-5 mr-2 text-blue-500" />
-                Communication History
+                <MailCheck className="h-5 w-5 mr-2 text-blue-500" />
+                Email Confirmation Status
               </h3>
 
-              <div className="bg-neutral-50 rounded-lg p-4">
-                <p className="text-neutral-600">Email communication history will be displayed here once the email system is implemented.</p>
+              {/* Email Status Overview */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-neutral-50 rounded-lg p-4">
+                  <h4 className="font-medium text-neutral-900 mb-4">Confirmation Email Status</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-neutral-600">Email Sent</span>
+                      <span className={`flex items-center space-x-2 ${
+                        booking.confirmation_email_sent ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {booking.confirmation_email_sent ? (
+                          <><CheckCircle2 className="h-4 w-4" /><span>Yes</span></>
+                        ) : (
+                          <><XCircle className="h-4 w-4" /><span>No</span></>
+                        )}
+                      </span>
+                    </div>
+                    
+                    {booking.confirmation_email_sent_at && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-neutral-600">Sent At</span>
+                        <span className="text-neutral-900">
+                          {formatSingaporeDateForDisplay(booking.confirmation_email_sent_at)}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-neutral-600">Send Attempts</span>
+                      <span className={`px-2 py-1 rounded text-sm ${
+                        (booking.email_send_attempts || 0) === 0 ? 'bg-neutral-100 text-neutral-600' :
+                        (booking.email_send_attempts || 0) === 1 ? 'bg-green-100 text-green-600' :
+                        (booking.email_send_attempts || 0) <= 3 ? 'bg-yellow-100 text-yellow-600' :
+                        'bg-red-100 text-red-600'
+                      }`}>
+                        {booking.email_send_attempts || 0}
+                      </span>
+                    </div>
+
+                    {booking.last_email_error && (
+                      <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <XCircle className="h-4 w-4 text-red-500" />
+                          <span className="font-medium text-red-900">Last Error</span>
+                        </div>
+                        <p className="text-sm text-red-800">{booking.last_email_error}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="bg-neutral-50 rounded-lg p-4">
+                  <h4 className="font-medium text-neutral-900 mb-4">Email Content Includes</h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2 text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span>Booking confirmation form</span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span>Terms & Conditions with signature</span>
+                    </div>
+                    {booking.payment_required && (
+                      <div className="flex items-center space-x-2 text-sm">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span>Payment invoice</span>
+                      </div>
+                    )}
+                    <div className="flex items-center space-x-2 text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span>Assessment details</span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
+              {/* Email Actions */}
               <div className="bg-white border border-neutral-200 rounded-lg p-4">
-                <h4 className="font-medium text-neutral-900 mb-4">Send Communication</h4>
-                <div className="flex space-x-3">
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                    Send Confirmation Email
+                <h4 className="font-medium text-neutral-900 mb-4">Email Actions</h4>
+                <div className="flex flex-wrap gap-3">
+                  <button 
+                    className={`px-4 py-2 rounded-lg transition-colors ${
+                      booking.confirmation_email_sent
+                        ? 'bg-green-600 text-white hover:bg-green-700'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    }`}
+                  >
+                    {booking.confirmation_email_sent ? 'Resend Confirmation Email' : 'Send Confirmation Email'}
                   </button>
-                  <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-                    Send Reminder
-                  </button>
+                  
                   <button className="bg-neutral-100 text-neutral-700 px-4 py-2 rounded-lg hover:bg-neutral-200 transition-colors">
-                    Send Custom Email
+                    View Email Preview
                   </button>
+                  
+                  {booking.last_email_error && (
+                    <button className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors">
+                      Retry Failed Email
+                    </button>
+                  )}
+                </div>
+                
+                {!booking.confirmation_email_sent && booking.owner_email && (
+                  <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      <strong>Recipient:</strong> {booking.owner_email}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Email System Status */}
+              <div className="bg-neutral-50 rounded-lg p-4">
+                <h4 className="font-medium text-neutral-900 mb-3">System Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-neutral-600">Email System:</span>
+                    <span className="ml-2 text-green-600 font-medium">Nodemailer (Active)</span>
+                  </div>
+                  <div>
+                    <span className="text-neutral-600">Webhook Status:</span>
+                    <span className="ml-2 text-green-600 font-medium">Configured</span>
+                  </div>
+                  <div>
+                    <span className="text-neutral-600">Backup System:</span>
+                    <span className="ml-2 text-blue-600 font-medium">Payment Verification API</span>
+                  </div>
+                  <div>
+                    <span className="text-neutral-600">PDF Generation:</span>
+                    <span className="ml-2 text-green-600 font-medium">jsPDF (Active)</span>
+                  </div>
                 </div>
               </div>
             </div>

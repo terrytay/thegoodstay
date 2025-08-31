@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Calendar, Dog, Phone, Mail, Search, Download, MessageSquare, User, MapPin, Heart, AlertCircle } from 'lucide-react'
+import { Calendar, Dog, Phone, Mail, Search, Download, MessageSquare, User, MapPin, Heart, AlertCircle, CheckCircle2, XCircle, Clock, MailCheck } from 'lucide-react'
 import { formatSingaporeDateForDisplay, formatSingaporeTimeForDisplay, toSingaporeTime, createSingaporeDate } from '@/lib/utils/singapore-timezone'
 
 interface Booking {
@@ -57,6 +57,15 @@ interface Booking {
   terms_accepted: boolean | null
   terms_accepted_at: string | null
   signature_completed: boolean | null
+  
+  // Email Tracking (from previous session enhancements)
+  confirmation_email_sent: boolean | null
+  confirmation_email_sent_at: string | null
+  email_send_attempts: number | null
+  last_email_error: string | null
+  
+  // Calendar Integration
+  calendar_event_id: string | null
 }
 
 export default function BookingsPage() {
@@ -112,7 +121,12 @@ export default function BookingsPage() {
           notes,
           terms_accepted,
           terms_accepted_at,
-          signature_completed
+          signature_completed,
+          confirmation_email_sent,
+          confirmation_email_sent_at,
+          email_send_attempts,
+          last_email_error,
+          calendar_event_id
         `)
         .order('created_at', { ascending: false })
 
@@ -165,14 +179,50 @@ export default function BookingsPage() {
   const updateBookingStatus = async (bookingId: string, newStatus: string) => {
     try {
       const supabase = createClient()
+      
+      // Update booking status
       const { error } = await supabase
         .from('bookings')
-        .update({ status: newStatus })
+        .update({ 
+          status: newStatus,
+          booking_status: newStatus === 'confirmed' ? 'confirmed' : undefined
+        })
         .eq('id', bookingId)
 
       if (error) {
         console.error('Error updating booking status:', error)
         return
+      }
+
+      // Handle calendar events based on status change
+      if (newStatus === 'confirmed') {
+        // Create calendar event for confirmed bookings
+        try {
+          await fetch('/api/calendar/create-booking-event', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ bookingId }),
+          })
+        } catch (calendarError) {
+          console.error('Failed to create calendar event:', calendarError)
+          // Don't fail the booking confirmation if calendar event fails
+        }
+      } else if (newStatus === 'cancelled') {
+        // Delete calendar event for cancelled bookings
+        try {
+          await fetch('/api/calendar/delete-booking-event', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ bookingId }),
+          })
+        } catch (calendarError) {
+          console.error('Failed to delete calendar event:', calendarError)
+          // Don't fail the booking cancellation if calendar event deletion fails
+        }
       }
 
       // Update local state
@@ -520,6 +570,61 @@ export default function BookingsPage() {
                                 booking.reaction_to_new_people.join(', ') : 
                                 booking.reaction_to_new_people
                             }
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Email Status */}
+                    <div>
+                      <h4 className="font-medium text-neutral-900 mb-3 flex items-center">
+                        <MailCheck className="h-4 w-4 mr-2 text-blue-500" />
+                        Email Confirmation
+                      </h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2 text-sm">
+                          {booking.confirmation_email_sent ? (
+                            <>
+                              <CheckCircle2 className="h-4 w-4 text-green-500" />
+                              <span className="text-green-700 font-medium">Email Sent</span>
+                              {booking.confirmation_email_sent_at && (
+                                <span className="text-neutral-500">
+                                  on {formatSingaporeDateForDisplay(booking.confirmation_email_sent_at)}
+                                </span>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              {booking.last_email_error ? (
+                                <>
+                                  <XCircle className="h-4 w-4 text-red-500" />
+                                  <span className="text-red-700 font-medium">Email Failed</span>
+                                  {booking.email_send_attempts && (
+                                    <span className="text-red-500 text-xs">
+                                      ({booking.email_send_attempts} attempts)
+                                    </span>
+                                  )}
+                                </>
+                              ) : booking.email_send_attempts && booking.email_send_attempts > 0 ? (
+                                <>
+                                  <Clock className="h-4 w-4 text-yellow-500" />
+                                  <span className="text-yellow-700 font-medium">Processing</span>
+                                  <span className="text-yellow-600 text-xs">
+                                    ({booking.email_send_attempts} attempts)
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  <XCircle className="h-4 w-4 text-neutral-400" />
+                                  <span className="text-neutral-600">Not Sent</span>
+                                </>
+                              )}
+                            </>
+                          )}
+                        </div>
+                        {booking.last_email_error && (
+                          <p className="text-xs text-red-600 bg-red-50 p-2 rounded">
+                            <span className="font-medium">Last Error:</span> {booking.last_email_error}
                           </p>
                         )}
                       </div>

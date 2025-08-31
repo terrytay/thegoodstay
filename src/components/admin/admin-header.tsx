@@ -330,8 +330,6 @@ export default function AdminHeader() {
         return 'Customers'
       case '/admin/analytics':
         return 'Analytics'
-      case '/admin/settings':
-        return 'Settings'
       default:
         return 'Admin Panel'
     }

@@ -317,6 +317,29 @@ async function handleAssessmentPayment(
       console.error("Error updating booking:", bookingUpdateError);
     }
 
+    // Create calendar event to block the time slot (don't await to avoid blocking webhook)
+    console.log(
+      `[ASSESSMENT PAYMENT:${requestId}] Creating calendar event for confirmed booking ${bookingId}`
+    );
+    fetch(
+      `${
+        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+      }/api/calendar/create-booking-event`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ bookingId }),
+      }
+    ).catch((calendarError) => {
+      console.error(
+        `[ASSESSMENT PAYMENT:${requestId}] Failed to create calendar event for booking ${bookingId}:`,
+        calendarError
+      );
+      // Don't fail the payment processing if calendar event creation fails
+    });
+
     // Send confirmation email with all documents
     await sendBookingConfirmationEmailFromWebhook(
       bookingId,

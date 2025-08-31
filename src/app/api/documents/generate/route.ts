@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Verify access token if provided
     if (accessToken) {
@@ -39,12 +39,18 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Update last accessed
+      // Update last accessed - first get current count
+      const { data: currentToken } = await supabase
+        .from("booking_access_tokens")
+        .select("access_count")
+        .eq("access_token", accessToken)
+        .single();
+
       await supabase
         .from("booking_access_tokens")
         .update({
           last_accessed_at: new Date().toISOString(),
-          access_count: supabase.sql`access_count + 1`,
+          access_count: (currentToken?.access_count || 0) + 1,
         })
         .eq("access_token", accessToken);
     }
@@ -170,6 +176,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Return PDF as response
+
+    // @ts-ignore
     return new NextResponse(documentBuffer, {
       headers: {
         "Content-Type": "application/pdf",

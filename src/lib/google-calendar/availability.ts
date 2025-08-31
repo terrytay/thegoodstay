@@ -244,3 +244,183 @@ export async function testCalendarConnection(): Promise<{ success: boolean; erro
     };
   }
 }
+
+/**
+ * Create a calendar event to block a booking time slot
+ */
+export async function createBookingEvent(
+  date: string, // YYYY-MM-DD
+  time: string, // HH:MM
+  bookingData: {
+    bookingId: string;
+    bookingToken: string;
+    ownerName: string;
+    dogName: string;
+    locationType: 'home' | 'park';
+    ownerEmail?: string;
+    ownerPhone?: string;
+  }
+): Promise<{ success: boolean; eventId?: string; error?: string }> {
+  try {
+    // Ensure calendar access
+    const accessResult = await ensureCalendarAccess();
+    if (!accessResult.success) {
+      console.error('Calendar access failed:', accessResult.error);
+      return { success: false, error: accessResult.error };
+    }
+
+    const calendar = createCalendarClient();
+    
+    // Create Singapore timezone datetime strings for 1-hour assessment slot
+    const [hour, minute] = time.split(':').map(Number);
+    const startDateTime = `${date}T${time}:00+08:00`;
+    const endHour = hour + 1;
+    const endDateTime = `${date}T${endHour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:00+08:00`;
+    
+    // Create event title and description
+    const eventTitle = `Dog Assessment - ${bookingData.dogName} (${bookingData.ownerName})`;
+    const eventDescription = `
+Booking Details:
+• Booking ID: ${bookingData.bookingToken}
+• Dog: ${bookingData.dogName}
+• Owner: ${bookingData.ownerName}
+• Location: ${bookingData.locationType === 'home' ? 'Home Visit' : 'Clementi Woods Park'}
+${bookingData.ownerEmail ? `• Email: ${bookingData.ownerEmail}` : ''}
+${bookingData.ownerPhone ? `• Phone: ${bookingData.ownerPhone}` : ''}
+
+This is an automated booking from The Good Stay assessment system.
+`.trim();
+
+    // Create the calendar event
+    const event = {
+      summary: eventTitle,
+      description: eventDescription,
+      start: {
+        dateTime: startDateTime,
+        timeZone: 'Asia/Singapore',
+      },
+      end: {
+        dateTime: endDateTime,
+        timeZone: 'Asia/Singapore',
+      },
+      // Add booking metadata for easy identification
+      extendedProperties: {
+        private: {
+          bookingId: bookingData.bookingId,
+          bookingToken: bookingData.bookingToken,
+          source: 'the-good-stay-booking-system',
+        }
+      },
+      // Set color to distinguish booking events (optional)
+      colorId: '9', // Blue color
+    };
+
+    const response = await calendar.events.insert({
+      calendarId: CALENDAR_ID,
+      requestBody: event,
+    });
+
+    const eventId = response.data.id;
+    if (eventId) {
+      console.log(`Calendar event created successfully: ${eventId} for booking ${bookingData.bookingToken}`);
+      return { success: true, eventId };
+    } else {
+      return { success: false, error: 'Failed to create calendar event - no event ID returned' };
+    }
+    
+  } catch (error) {
+    console.error('Error creating calendar event:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    };
+  }
+}
+
+/**
+ * Delete a booking event from the calendar
+ */
+export async function deleteBookingEvent(eventId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    // Ensure calendar access
+    const accessResult = await ensureCalendarAccess();
+    if (!accessResult.success) {
+      console.error('Calendar access failed:', accessResult.error);
+      return { success: false, error: accessResult.error };
+    }
+
+    const calendar = createCalendarClient();
+    
+    await calendar.events.delete({
+      calendarId: CALENDAR_ID,
+      eventId: eventId,
+    });
+
+    console.log(`Calendar event deleted successfully: ${eventId}`);
+    return { success: true };
+    
+  } catch (error) {
+    console.error('Error deleting calendar event:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    };
+  }
+}
+
+/**
+ * Find and delete booking events by booking ID
+ */
+export async function deleteBookingEventsByBookingId(bookingId: string): Promise<{ success: boolean; deletedCount: number; error?: string }> {
+  try {
+    // Ensure calendar access
+    const accessResult = await ensureCalendarAccess();
+    if (!accessResult.success) {
+      console.error('Calendar access failed:', accessResult.error);
+      return { success: false, deletedCount: 0, error: accessResult.error };
+    }
+
+    const calendar = createCalendarClient();
+    
+    // Search for events with the booking ID in extended properties
+    // Note: Google Calendar API doesn't support searching by extended properties directly
+    // So we'll search events in a reasonable time range (next 6 months)
+    const searchTimeMin = new Date().toISOString();
+    const searchTimeMax = new Date(Date.now() + (6 * 30 * 24 * 60 * 60 * 1000)).toISOString(); // 6 months from now
+    
+    const response = await calendar.events.list({
+      calendarId: CALENDAR_ID,
+      timeMin: searchTimeMin,
+      timeMax: searchTimeMax,
+      singleEvents: true,
+      orderBy: 'startTime',
+    });
+
+    const events = response.data.items || [];
+    const bookingEvents = events.filter(event => 
+      event.extendedProperties?.private?.bookingId === bookingId ||
+      event.extendedProperties?.private?.bookingToken === bookingId // Also check by booking token
+    );
+
+    let deletedCount = 0;
+    for (const event of bookingEvents) {
+      if (event.id) {
+        const deleteResult = await deleteBookingEvent(event.id);
+        if (deleteResult.success) {
+          deletedCount++;
+        }
+      }
+    }
+
+    console.log(`Deleted ${deletedCount} calendar events for booking ${bookingId}`);
+    return { success: true, deletedCount };
+    
+  } catch (error) {
+    console.error('Error finding/deleting booking events:', error);
+    return { 
+      success: false, 
+      deletedCount: 0,
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    };
+  }
+}
