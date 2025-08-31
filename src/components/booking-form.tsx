@@ -15,7 +15,10 @@ import {
   PenTool,
 } from "lucide-react";
 import DateTimePicker from "./date-time-picker";
-import { createSingaporeDate, singaporeDateToISOString } from "@/lib/utils/singapore-timezone";
+import {
+  createSingaporeDate,
+  singaporeDateToISOString,
+} from "@/lib/utils/singapore-timezone";
 
 interface AssessmentFormData {
   // Owner Information
@@ -167,8 +170,7 @@ export default function BookingForm() {
         errors.ownerFirstName = "First name is required";
       if (!formData.ownerLastName.trim())
         errors.ownerLastName = "Last name is required";
-      if (!formData.ownerEmail.trim())
-        errors.ownerEmail = "Email is required";
+      if (!formData.ownerEmail.trim()) errors.ownerEmail = "Email is required";
       else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.ownerEmail))
         errors.ownerEmail = "Please enter a valid email address";
       if (!formData.contactAreaCode.trim())
@@ -194,8 +196,8 @@ export default function BookingForm() {
 
     if (currentStep === 2) {
       // Behavioral Assessment
-      if (formData.reactionToNewPeople.length === 0)
-        errors.reactionToNewPeople = "Please select at least one reaction type";
+      // if (formData.reactionToNewPeople.length === 0)
+      //   errors.reactionToNewPeople = "Please select at least one reaction type";
       if (!formData.biteHistory)
         errors.biteHistory = "Please indicate bite history";
     }
@@ -306,19 +308,22 @@ export default function BookingForm() {
       const supabase = createClient();
 
       // Check availability using Google Calendar
-      const availabilityResponse = await fetch('/api/calendar/check-availability', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          date: formData.preferredDate,
-          time: formData.preferredTime,
-        }),
-      });
+      const availabilityResponse = await fetch(
+        "/api/calendar/check-availability",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            date: formData.preferredDate,
+            time: formData.preferredTime,
+          }),
+        }
+      );
 
       if (!availabilityResponse.ok) {
-        throw new Error('Failed to check availability. Please try again.');
+        throw new Error("Failed to check availability. Please try again.");
       }
 
       const availabilityResult = await availabilityResponse.json();
@@ -449,13 +454,15 @@ export default function BookingForm() {
         });
 
         const responseData = await response.json();
-        
+
         if (!response.ok) {
-          throw new Error(responseData.error || "Failed to create payment session");
+          throw new Error(
+            responseData.error || "Failed to create payment session"
+          );
         }
 
         const { sessionId } = responseData;
-        
+
         if (!sessionId) {
           throw new Error("No session ID received from payment API");
         }
@@ -464,19 +471,19 @@ export default function BookingForm() {
         const stripe = await import("@stripe/stripe-js").then((m) =>
           m.loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
         );
-        
+
         if (!stripe) {
           throw new Error("Failed to load Stripe");
         }
-        
+
         await stripe.redirectToCheckout({ sessionId });
       } else {
         // No payment required, send confirmation email and show success
         try {
-          await fetch('/api/send-booking-email', {
-            method: 'POST',
+          await fetch("/api/send-booking-email", {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({
               bookingData: formData,
@@ -484,10 +491,10 @@ export default function BookingForm() {
             }),
           });
         } catch (emailError) {
-          console.error('Error sending confirmation email:', emailError);
+          console.error("Error sending confirmation email:", emailError);
           // Don't fail the booking if email fails, just log it
         }
-        
+
         setIsSubmitted(true);
       }
     } catch (err) {
