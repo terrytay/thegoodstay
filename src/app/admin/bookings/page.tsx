@@ -2,19 +2,61 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Calendar, Dog, Phone, Mail, Search, Download, MessageSquare } from 'lucide-react'
+import { Calendar, Dog, Phone, Mail, Search, Download, MessageSquare, User, MapPin, Heart, AlertCircle } from 'lucide-react'
+import { formatSingaporeDateForDisplay, formatSingaporeTimeForDisplay, toSingaporeTime, createSingaporeDate } from '@/lib/utils/singapore-timezone'
 
 interface Booking {
   id: string
+  user_id: string | null
+  booking_token: string | null
+  
+  // Dog Information
   dog_name: string
+  dog_first_name: string | null
+  dog_last_name: string | null
   dog_breed: string | null
-  dog_age: number | null
+  dog_age: string | null // Now text, not number
+  dog_gender_neuter: string | null
+  
+  // Owner Information
+  owner_name: string | null
+  owner_first_name: string | null
+  owner_last_name: string | null
+  owner_email: string | null
+  contact_area_code: string | null
+  contact_phone: string | null
+  address_street1: string | null
+  address_street2: string | null
+  address_city: string | null
+  address_state: string | null
+  address_postal: string | null
+  instagram: string | null
+  
+  // Booking Details
   preferred_date: string
   preferred_time: string | null
+  location_type: string | null
+  home_visit_fee: number | null
+  payment_required: boolean | null
+  payment_amount: number | null
+  total_paid: number | null
+  
+  // Assessment Data
+  reaction_to_new_people: any | null
+  bite_history: string | null
+  vaccination_status: string | null
+  current_medical_issues: string | null
+  food_allergies: string | null
+  
+  // Status and Metadata
   status: string
+  booking_status: string | null
   created_at: string
+  updated_at: string | null
   notes: string | null
-  special_requirements: string | null
+  terms_accepted: boolean | null
+  terms_accepted_at: string | null
+  signature_completed: boolean | null
 }
 
 export default function BookingsPage() {
@@ -29,7 +71,49 @@ export default function BookingsPage() {
       const supabase = createClient()
       let query = supabase
         .from('bookings')
-        .select('*')
+        .select(`
+          id,
+          user_id,
+          booking_token,
+          dog_name,
+          dog_first_name,
+          dog_last_name,
+          dog_breed,
+          dog_age,
+          dog_gender_neuter,
+          owner_name,
+          owner_first_name,
+          owner_last_name,
+          owner_email,
+          contact_area_code,
+          contact_phone,
+          address_street1,
+          address_street2,
+          address_city,
+          address_state,
+          address_postal,
+          instagram,
+          preferred_date,
+          preferred_time,
+          location_type,
+          home_visit_fee,
+          payment_required,
+          payment_amount,
+          total_paid,
+          reaction_to_new_people,
+          bite_history,
+          vaccination_status,
+          current_medical_issues,
+          food_allergies,
+          status,
+          booking_status,
+          created_at,
+          updated_at,
+          notes,
+          terms_accepted,
+          terms_accepted_at,
+          signature_completed
+        `)
         .order('created_at', { ascending: false })
 
       if (statusFilter !== 'all') {
@@ -37,7 +121,14 @@ export default function BookingsPage() {
       }
 
       if (searchTerm) {
-        query = query.or(`dog_name.ilike.%${searchTerm}%,notes.ilike.%${searchTerm}%`)
+        query = query.or(`
+          dog_name.ilike.%${searchTerm}%,
+          owner_first_name.ilike.%${searchTerm}%,
+          owner_last_name.ilike.%${searchTerm}%,
+          owner_email.ilike.%${searchTerm}%,
+          contact_phone.ilike.%${searchTerm}%,
+          booking_token.ilike.%${searchTerm}%
+        `)
       }
 
       if (dateFilter === 'today') {
@@ -109,36 +200,64 @@ export default function BookingsPage() {
     }
   }
 
-  // Extract contact info from notes field
-  const extractContactInfo = (notes: string | null) => {
-    if (!notes) return { name: 'Unknown', email: 'N/A', phone: 'N/A' }
+  // Get proper contact info from database fields
+  const getContactInfo = (booking: Booking) => {
+    const name = booking.owner_name || 
+      (booking.owner_first_name && booking.owner_last_name ? 
+        `${booking.owner_first_name} ${booking.owner_last_name}` : 
+        booking.owner_first_name || 'Unknown');
     
-    const emailMatch = notes.match(/Email:\s*([^\s,]+)/)
-    const phoneMatch = notes.match(/Phone:\s*([^\s,]+)/)
-    const nameMatch = notes.match(/Contact:\s*([^,]+)/)
+    const email = booking.owner_email || 'No email provided';
     
-    return {
-      name: nameMatch?.[1]?.trim() || 'Unknown',
-      email: emailMatch?.[1]?.trim() || 'N/A',
-      phone: phoneMatch?.[1]?.trim() || 'N/A'
-    }
+    const phone = booking.contact_phone ? 
+      (booking.contact_area_code ? 
+        `${booking.contact_area_code}-${booking.contact_phone}` : 
+        booking.contact_phone) : 
+      'No phone provided';
+    
+    return { name, email, phone };
+  }
+
+  // Get full address
+  const getFullAddress = (booking: Booking) => {
+    const parts = [
+      booking.address_street1,
+      booking.address_street2,
+      booking.address_city,
+      booking.address_state,
+      booking.address_postal
+    ].filter(Boolean);
+    return parts.length > 0 ? parts.join(', ') : 'No address provided';
   }
 
   const exportBookings = async () => {
     try {
       const csv = [
-        ['Booking ID', 'Dog Name', 'Owner Name', 'Email', 'Phone', 'Preferred Date', 'Status', 'Created'].join(','),
+        ['Booking Token', 'Dog Name', 'Dog Breed', 'Dog Age', 'Owner Name', 'Email', 'Phone', 'Address', 'Preferred Date', 'Preferred Time', 'Location Type', 'Status', 'Booking Status', 'Payment Required', 'Amount Paid', 'Vaccination Status', 'Created'].join(','),
         ...bookings.map(booking => {
-          const contact = extractContactInfo(booking.notes)
+          const contact = getContactInfo(booking)
+          const address = getFullAddress(booking)
+          const sgCreated = toSingaporeTime(new Date(booking.created_at))
+          const sgPreferredDate = formatSingaporeDateForDisplay(booking.preferred_date)
+          
           return [
-            booking.id,
+            booking.booking_token || booking.id,
             booking.dog_name,
+            booking.dog_breed || 'Not specified',
+            booking.dog_age || 'Not specified',
             contact.name,
             contact.email,
             contact.phone,
-            booking.preferred_date,
+            address,
+            sgPreferredDate,
+            booking.preferred_time || 'Not specified',
+            booking.location_type === 'home' ? 'Home Visit' : 'Park Visit',
             booking.status,
-            new Date(booking.created_at).toLocaleDateString()
+            booking.booking_status || 'N/A',
+            booking.payment_required ? 'Yes' : 'No',
+            booking.total_paid ? `$${booking.total_paid}` : '$0',
+            booking.vaccination_status || 'Not specified',
+            sgCreated.toLocaleDateString('en-SG')
           ].join(',')
         })
       ].join('\n')
@@ -250,8 +369,11 @@ export default function BookingsPage() {
         ) : (
           <div className="divide-y divide-neutral-200">
             {bookings.map((booking) => {
-              const contactInfo = extractContactInfo(booking.notes)
-              const isUpcoming = new Date(booking.preferred_date) >= new Date()
+              const contactInfo = getContactInfo(booking)
+              const fullAddress = getFullAddress(booking)
+              const sgPreferredDate = toSingaporeTime(new Date(booking.preferred_date + 'T00:00:00'))
+              const sgNow = toSingaporeTime(new Date())
+              const isUpcoming = sgPreferredDate >= sgNow
               
               return (
                 <div key={booking.id} className="p-6 hover:bg-neutral-50">
@@ -261,10 +383,18 @@ export default function BookingsPage() {
                         <Dog className="h-6 w-6 text-amber-600" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-lg text-neutral-900">{booking.dog_name}</h3>
+                        <h3 className="font-semibold text-lg text-neutral-900">
+                          {booking.dog_name}
+                          {booking.booking_token && (
+                            <span className="ml-2 text-sm font-mono text-neutral-500 bg-neutral-100 px-2 py-1 rounded">
+                              {booking.booking_token}
+                            </span>
+                          )}
+                        </h3>
                         <p className="text-neutral-600">
                           {booking.dog_breed || 'Mixed Breed'} 
-                          {booking.dog_age && ` • ${booking.dog_age} years old`}
+                          {booking.dog_age && ` • ${booking.dog_age}`}
+                          {booking.dog_gender_neuter && ` • ${booking.dog_gender_neuter}`}
                         </p>
                       </div>
                     </div>
@@ -310,25 +440,99 @@ export default function BookingsPage() {
                       <div className="space-y-2">
                         <div className="flex items-center space-x-2 text-sm text-neutral-600">
                           <Calendar className="h-4 w-4" />
-                          <span>{new Date(booking.preferred_date).toLocaleDateString()}</span>
-                          {booking.preferred_time && <span>at {booking.preferred_time}</span>}
+                          <span>{formatSingaporeDateForDisplay(booking.preferred_date)}</span>
+                          {booking.preferred_time && <span>at {formatSingaporeTimeForDisplay(createSingaporeDate(booking.preferred_date, booking.preferred_time))}</span>}
                         </div>
+                        <div className="flex items-center space-x-2 text-sm text-neutral-600">
+                          <MapPin className="h-4 w-4" />
+                          <span>
+                            {booking.location_type === 'home' ? 
+                              `Home Visit (+$${booking.home_visit_fee || 25})` : 
+                              'Clementi Woods Park (Free)'
+                            }
+                          </span>
+                        </div>
+                        {booking.payment_required && (
+                          <div className="flex items-center space-x-2 text-sm">
+                            <span className={`px-2 py-1 rounded text-xs ${
+                              booking.total_paid && booking.total_paid > 0 ? 
+                                'bg-green-100 text-green-800' : 
+                                'bg-yellow-100 text-yellow-800'
+                            }`}>
+                              {booking.total_paid && booking.total_paid > 0 ? 
+                                `Paid: $${booking.total_paid}` : 
+                                `Payment Required: $${booking.payment_amount || 25}`
+                              }
+                            </span>
+                          </div>
+                        )}
                         <p className="text-xs text-neutral-500">
-                          Requested on {new Date(booking.created_at).toLocaleDateString()}
+                          Requested on {formatSingaporeDateForDisplay(booking.created_at)}
                         </p>
                       </div>
                     </div>
 
-                    {/* Special Requirements */}
-                    {(booking.special_requirements || booking.notes) && (
+                    {/* Health & Assessment Info */}
+                    <div>
+                      <h4 className="font-medium text-neutral-900 mb-3 flex items-center">
+                        <Heart className="h-4 w-4 mr-2 text-red-500" />
+                        Health & Assessment
+                      </h4>
+                      <div className="space-y-2">
+                        {booking.vaccination_status && (
+                          <div className="flex items-center space-x-2 text-sm">
+                            <span className="text-neutral-600">Vaccinated:</span>
+                            <span className={`px-2 py-1 rounded text-xs ${
+                              booking.vaccination_status === 'Yes' ? 
+                                'bg-green-100 text-green-800' : 
+                                'bg-red-100 text-red-800'
+                            }`}>
+                              {booking.vaccination_status}
+                            </span>
+                          </div>
+                        )}
+                        {booking.bite_history && (
+                          <div className="flex items-center space-x-2 text-sm">
+                            <span className="text-neutral-600">Bite History:</span>
+                            <span className={`px-2 py-1 rounded text-xs ${
+                              booking.bite_history === 'No' ? 
+                                'bg-green-100 text-green-800' : 
+                                'bg-orange-100 text-orange-800'
+                            }`}>
+                              {booking.bite_history}
+                            </span>
+                          </div>
+                        )}
+                        {booking.current_medical_issues && (
+                          <p className="text-xs text-neutral-600 bg-blue-50 p-2 rounded">
+                            <span className="font-medium">Medical Issues:</span> {booking.current_medical_issues}
+                          </p>
+                        )}
+                        {booking.food_allergies && (
+                          <p className="text-xs text-neutral-600 bg-yellow-50 p-2 rounded">
+                            <span className="font-medium">Food Allergies:</span> {booking.food_allergies}
+                          </p>
+                        )}
+                        {booking.reaction_to_new_people && (
+                          <p className="text-xs text-neutral-600 bg-purple-50 p-2 rounded">
+                            <span className="font-medium">Reaction to New People:</span> {
+                              Array.isArray(booking.reaction_to_new_people) ? 
+                                booking.reaction_to_new_people.join(', ') : 
+                                booking.reaction_to_new_people
+                            }
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Notes */}
+                    {booking.notes && (
                       <div>
                         <h4 className="font-medium text-neutral-900 mb-3">Notes</h4>
                         <div className="space-y-2">
-                          {booking.special_requirements && (
-                            <p className="text-sm text-neutral-600 bg-neutral-50 p-2 rounded">
-                              {booking.special_requirements}
-                            </p>
-                          )}
+                          <p className="text-sm text-neutral-600 bg-neutral-50 p-2 rounded">
+                            {booking.notes}
+                          </p>
                         </div>
                       </div>
                     )}
@@ -360,9 +564,25 @@ export default function BookingsPage() {
                       </button>
                     )}
                     
-                    <button className="bg-neutral-100 text-neutral-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-200 transition-colors">
-                      View Details
+                    <button 
+                      onClick={() => window.location.href = `/admin/bookings/${booking.id}`}
+                      className="bg-neutral-100 text-neutral-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-200 transition-colors"
+                    >
+                      View Full Details
                     </button>
+                    
+                    {booking.signature_completed && (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <AlertCircle className="h-3 w-3 mr-1" />
+                        Signed
+                      </span>
+                    )}
+                    
+                    {booking.terms_accepted && (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Terms Accepted
+                      </span>
+                    )}
                   </div>
                 </div>
               )

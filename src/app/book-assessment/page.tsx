@@ -5,20 +5,20 @@ import { Calendar, Clock, CheckCircle, Heart } from "lucide-react";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Book Assessment Visit",
+  title: "Book Professional Dog Assessment",
   description:
-    "Schedule a complimentary assessment visit to ensure we're the perfect match for your dog. Professional dog boarding consultation with no obligation.",
+    "Schedule a professional dog behavioral and temperament assessment. Comprehensive evaluation to ensure the best care for your dog. $25 fee for home visits, free at our location.",
   keywords: [
+    "dog behavioral assessment",
+    "professional dog evaluation",
+    "dog temperament assessment",
     "dog boarding assessment",
-    "pet consultation",
-    "dog boarding consultation",
-    "assessment visit",
-    "dog care evaluation",
+    "comprehensive dog evaluation",
   ],
   openGraph: {
-    title: "Book Assessment Visit | The Good Stay",
+    title: "Book Professional Dog Assessment | The Good Stay",
     description:
-      "Schedule a complimentary assessment visit to ensure we're the perfect match for your dog.",
+      "Professional dog behavioral and temperament assessment with comprehensive evaluation form.",
     url: "https://thegoodstay.vercel.app/book-assessment",
   },
 };
@@ -33,24 +33,33 @@ export default function BookAssessmentPage() {
         <section className="bg-gradient-to-br from-amber-50 to-stone-100 py-24">
           <div className="max-w-4xl mx-auto px-8 lg:px-12 text-center">
             <h1 className="font-crimson text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-normal text-stone-900 mb-8 leading-tight">
-              Book Your Assessment Visit
+              Professional Dog Assessment
             </h1>
             <p className="font-lora text-xl md:text-2xl text-stone-700 mb-16 leading-relaxed">
-              Start your journey with a complimentary consultation to ensure
-              we&apos;re the perfect match for your furry friend.
+              Comprehensive behavioral and temperament evaluation to ensure the best care and compatibility for your dog.
             </p>
 
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-stone-200 max-w-md mx-auto">
-              <div className="flex items-center space-x-4">
-                <div className="bg-green-100 p-3 rounded-full">
-                  <CheckCircle className="h-6 w-6 text-green-600" />
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-stone-200 max-w-lg mx-auto">
+              <div className="space-y-4">
+                <div className="flex items-center space-x-4">
+                  <div className="bg-amber-100 p-3 rounded-full">
+                    <CheckCircle className="h-6 w-6 text-amber-600" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-lora font-semibold text-stone-900">
+                      Professional Assessment
+                    </p>
+                    <p className="font-lora text-stone-600">
+                      Complete evaluation at Clementi Woods Park
+                    </p>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <p className="font-lora font-semibold text-stone-900">
-                    100% Free Assessment
+                <div className="bg-stone-50 rounded-lg p-4 border-l-4 border-amber-500">
+                  <p className="font-lora text-sm text-stone-700">
+                    <strong>Assessment Fee:</strong> $25.00 (non-refundable) for home visits
                   </p>
-                  <p className="font-lora text-stone-600">
-                    No obligation, just getting to know each other
+                  <p className="font-lora text-xs text-stone-600 mt-1">
+                    Park location assessments included at no charge
                   </p>
                 </div>
               </div>
@@ -74,12 +83,23 @@ export default function BookAssessmentPage() {
                   <Calendar className="h-10 w-10 text-amber-700" />
                 </div>
                 <h3 className="font-crimson text-2xl font-normal text-stone-900 mb-4">
-                  1. Schedule Your Visit
+                  1. Complete Assessment Form
                 </h3>
-                <p className="font-lora text-stone-600 leading-relaxed">
-                  Choose a convenient time that works for you and your dog.
-                  We&apos;ll meet at my location for the assessment.
+                <p className="font-lora text-stone-600 leading-relaxed mb-3">
+                  Fill out our comprehensive behavioral assessment form with detailed information about your dog.
+                  We&apos;ll meet at <strong>Clementi Woods Park</strong> for the assessment.
                 </p>
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm">
+                  <p className="font-lora text-amber-800 mb-2">
+                    <strong>📍 Location:</strong> Clementi Woods Park
+                  </p>
+                  <p className="font-lora text-amber-800 mb-2">
+                    <strong>🚗 Nearest Parking:</strong> 613 Clementi West St 1
+                  </p>
+                  <p className="font-lora text-amber-800">
+                    <strong>💰 Home Visits:</strong> For assessments at your location, there will be an additional $25.00 fee
+                  </p>
+                </div>
               </div>
 
               <div className="text-center group">
@@ -87,11 +107,10 @@ export default function BookAssessmentPage() {
                   <Heart className="h-10 w-10 text-green-700" />
                 </div>
                 <h3 className="font-crimson text-2xl font-normal text-stone-900 mb-4">
-                  2. Meet & Greet
+                  2. Professional Evaluation
                 </h3>
                 <p className="font-lora text-stone-600 leading-relaxed">
-                  We&apos;ll spend time getting to know your dog&apos;s
-                  personality, needs, and preferences in a relaxed environment.
+                  Our team conducts a comprehensive behavioral assessment based on your form responses and direct interaction with your dog.
                 </p>
               </div>
 
@@ -100,11 +119,10 @@ export default function BookAssessmentPage() {
                   <Clock className="h-10 w-10 text-blue-700" />
                 </div>
                 <h3 className="font-crimson text-2xl font-normal text-stone-900 mb-4">
-                  3. Discussion & Planning
+                  3. Results & Recommendations  
                 </h3>
                 <p className="font-lora text-stone-600 leading-relaxed">
-                  We&apos;ll discuss your dog&apos;s routine, any special needs,
-                  and see if we&apos;re a good fit for future boarding.
+                  You&apos;ll receive detailed feedback on your dog&apos;s assessment and personalized recommendations for our boarding services.
                 </p>
               </div>
             </div>

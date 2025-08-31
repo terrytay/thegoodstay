@@ -1,7 +1,7 @@
 {
   "hero": {
     "title": "Wholesome living made for the goodest lives",
-    "subtitle": "Professional dog boarding and pet care services with personalized attention. Your beloved companion deserves nothing but the best.",
+    "subtitle": "Trusted home-based dog boarding and pet care services with personalised attention",
     "backgroundImage": "/images/hero-bg.jpg",
     "ctaButtons": [
       {
@@ -24,12 +24,12 @@
   "trustIndicators": [
     {
       "icon": "shield",
-      "text": "Licensed & Insured",
+      "text": "Fear Free Certified in Pet Boarding and Daycare",
       "color": "green"
     },
     {
       "icon": "heart",
-      "text": "Loving Care",
+      "text": "Basic First Aid for Pets Certified",
       "color": "red"
     },
     {
@@ -45,7 +45,7 @@
       "features": [
         {
           "title": "Personalized Care Plans",
-          "description": "Every dog is unique. I create customized care plans based on your dog's personality, needs, and preferences.",
+          "description": "No two dogs are the same. I take the time to meet each one personally before confirming, so I can tailor care to their personality and preferences.",
           "icon": "user"
         },
         {
@@ -71,14 +71,14 @@
       "image": "bio.jpg",
       "testimonials": [
         {
-          "quote": "Our beagle, Toby, can be a handful, but Yee Sin handled him like a pro. She didn’t just walk him, she helped reinforce good habits and kept him happy and engaged. The daily photo updates made us feel connected even when we were away.",
-          "author": "Amanda Wong",
-          "role": "Dog Mom to Toby"
+          "quote": "Yeesin is the absolute best! We always leave Xander with her whenever we go on vacation, and it’s such a relief knowing he’s in great hands. He gets so excited to see her, which says it all. She’s super caring, attentive, and clearly loves what she does. Can’t recommend her enough!",
+          "author": "Vincent",
+          "role": "Parent to Xander"
         },
         {
-          "quote": "Finding someone who truly understands senior dogs is rare, but Yee Sin exceeded every expectation with our golden retriever, Daisy. She managed Daisy’s medication perfectly and gave her so much love and care. We came home to the happiest senior pup ever.",
-          "author": "Daniel & Priya",
-          "role": "Dog Parents to Daisy"
+          "quote": "Yeesin is our go-to dog boarder for Zane and Ollie - we trust her 100% to love and care of our babies, and they clearly adore her too! She is very experienced in dog handling and patient with our dogs’ needs.",
+          "author": "Isabelle",
+          "role": "Parent to Zane and Ollie"
         }
       ]
     }

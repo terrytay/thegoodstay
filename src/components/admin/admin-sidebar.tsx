@@ -10,7 +10,6 @@ import {
   Calendar,
   Users,
   BarChart3,
-  Settings,
   LogOut,
   FileText,
 } from "lucide-react";
@@ -22,10 +21,10 @@ export default function AdminSidebar() {
     { name: "Dashboard", href: "/admin", icon: Home },
     { name: "Products", href: "/admin/products", icon: Package },
     { name: "Orders", href: "/admin/orders", icon: ShoppingBag },
-    { name: "Bookings", href: "/admin/bookings", icon: Calendar },
+    { name: "Calendar Setup", href: "/admin/calendar", icon: Calendar },
+    { name: "Bookings", href: "/admin/bookings", icon: FileText },
     { name: "Customers", href: "/admin/customers", icon: Users },
     { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
-    { name: "Settings", href: "/admin/settings", icon: Settings },
   ];
 
   return (

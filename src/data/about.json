@@ -1,7 +1,7 @@
 {
   "hero": {
     "title": "My Story",
-    "subtitle": "I believe every dog deserves personalized care, genuine love, and the comfort of a home away from home. My love for dogs is what inspires me to give them the best care possible.",
+    "subtitle": "Hi, I am Yeesin, the heart behind The Good Stay. I’ve always believed that dogs aren’t just pets - they are family. That's why I created The Good Stay: a safe, cozy, and loving space where pups can feel truly at home. I believe every dog deserves personalized care, genuine love, and the comfort of a home away from home. My love for dogs is what inspires me to give each one the best care possible, tailored to who they are.",
     "backgroundImage": "/images/about-hero.jpg"
   },
   "sections": [
@@ -26,7 +26,7 @@
   ],
   "stats": [
     {
-      "number": "100+",
+      "number": "50+",
       "label": "Happy Families"
     },
     {
