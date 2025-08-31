@@ -16,15 +16,8 @@ export async function POST(request: NextRequest) {
       customerInfo: customerInfo?.name,
     });
 
-    // Validate base URL
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-    if (!baseUrl) {
-      throw new Error("NEXT_PUBLIC_BASE_URL environment variable is not set");
-    }
-    
     // Ensure URL has proper scheme
-    const validatedBaseUrl = baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`;
-    console.log("Using base URL:", validatedBaseUrl);
+    const validatedBaseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
     if (!bookingId || !amount || !customerInfo) {
       console.log("Missing required fields:", {
