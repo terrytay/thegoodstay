@@ -18,7 +18,8 @@ export function createCalendarClient() {
   const auth = new google.auth.GoogleAuth({
     credentials,
     scopes: [
-      'https://www.googleapis.com/auth/calendar.readonly',
+      'https://www.googleapis.com/auth/calendar',
+      'https://www.googleapis.com/auth/calendar.events',
       'https://www.googleapis.com/auth/calendar.calendars',
       'https://www.googleapis.com/auth/calendar.calendarlist'
     ],
